@@ -25,10 +25,10 @@ public class DrivetrainSubsystem extends Subsystem {
 	private DrivetrainSubsystem() {
 		super("Drivetrain");
 
-		WPI_TalonSRX leftMaster = new WPI_TalonSRX(RobotMap.Talon.LEFT_MASTER.get_channel());
-		WPI_TalonSRX rightMaster = new WPI_TalonSRX(RobotMap.Talon.RIGHT_MASTER.get_channel());
-		WPI_TalonSRX leftSlave = new WPI_TalonSRX(RobotMap.Talon.LEFT_SLAVE.get_channel());
-		WPI_TalonSRX rightSlave = new WPI_TalonSRX(RobotMap.Talon.RIGHT_SLAVE.get_channel());
+		WPI_TalonSRX leftMaster = new WPI_TalonSRX(RobotMap.Talon.LEFT_MASTER.getChannel());
+		WPI_TalonSRX rightMaster = new WPI_TalonSRX(RobotMap.Talon.RIGHT_MASTER.getChannel());
+		WPI_TalonSRX leftSlave = new WPI_TalonSRX(RobotMap.Talon.LEFT_SLAVE.getChannel());
+		WPI_TalonSRX rightSlave = new WPI_TalonSRX(RobotMap.Talon.RIGHT_SLAVE.getChannel());
 
 		SpeedControllerGroup leftGroup = new SpeedControllerGroup(leftMaster, leftSlave);
 		SpeedControllerGroup rightGroup = new SpeedControllerGroup(rightMaster, rightSlave);

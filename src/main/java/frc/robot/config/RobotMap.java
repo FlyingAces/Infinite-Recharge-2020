@@ -7,7 +7,9 @@ public class RobotMap {
         LEFT_MASTER(0),
         LEFT_SLAVE(0),
         RIGHT_MASTER(0),
-        RIGHT_SLAVE(0);
+        RIGHT_SLAVE(0),
+        INTAKE(0),
+        TEST(0);
 
         private int _channel;
 
@@ -15,7 +17,7 @@ public class RobotMap {
             _channel = channel;
         }
 
-        public int get_channel() {
+        public int getChannel() {
             return _channel;
         }
     }
