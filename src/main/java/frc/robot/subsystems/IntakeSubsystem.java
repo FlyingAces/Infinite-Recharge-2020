@@ -15,7 +15,7 @@ public class IntakeSubsystem extends Subsystem {
         super("IntakeSubsystem");
 
         _intake = new WPI_TalonSRX(RobotMap.Talon.INTAKE.getChannel());
-        
+
         _intake.configFactoryDefault();
         _intake.setNeutralMode(NeutralMode.Brake);
         _intake.configNominalOutputForward(0, RobotMap.K_TIMEOUT_MS);

@@ -8,7 +8,8 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.controller.PIDController;
+import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 import frc.robot.commands.DriveRobot;
@@ -16,14 +17,14 @@ import frc.robot.config.MotorSpeeds;
 import frc.robot.config.RobotMap;
 
 
-public class DrivetrainSubsystem extends Subsystem {
+public class DrivetrainSubsystem extends PIDSubsystem {
 	private static DrivetrainSubsystem _instance;
 	private TalonSRX _leftWithEncoder;
 	private TalonSRX _rightWithEncoder;
 	private DifferentialDrive _wheels;
 
 	private DrivetrainSubsystem() {
-		super("Drivetrain");
+		super(new PIDController(1.0, 0.0, 0.0));
 
 		WPI_TalonSRX leftMaster = new WPI_TalonSRX(RobotMap.Talon.LEFT_MASTER.getChannel());
 		WPI_TalonSRX rightMaster = new WPI_TalonSRX(RobotMap.Talon.RIGHT_MASTER.getChannel());
@@ -108,8 +109,29 @@ public class DrivetrainSubsystem extends Subsystem {
 	}
 
 	@Override
-	protected void initDefaultCommand() {
-		setDefaultCommand(new DriveRobot());
+	protected void useOutput(double output, double setpoint) {
+		double leftMoveValue = output;
+		double rightMoveValue = output;
+
+		double rightSpeed = Math.abs(getCurrentRightVelocity());
+		double leftSpeed = Math.abs(getCurrentLeftVelocity());
+
+		if(rightSpeed > leftSpeed)
+			rightMoveValue *= leftSpeed / rightSpeed;
+		else if(leftSpeed > rightSpeed)
+			leftMoveValue *= rightSpeed / leftSpeed;
+
+		tankDrive(leftMoveValue, rightMoveValue);
+	}
+
+	@Override
+	protected double getMeasurement() {
+		double setpoint = getController().getSetpoint();
+		if(Math.abs(setpoint - getCurrentLeftPosition()) < Math.abs(setpoint - getCurrentRightPosition())) {
+			return getCurrentRightPosition();
+		} else {
+			return getCurrentLeftPosition();
+		}
 	}
 }
 
