@@ -4,11 +4,10 @@ public class RobotMap {
     public static final int K_TIMEOUT_MS = 30;
 
     public enum Talon {
-        LEFT_MASTER(0),
-        LEFT_SLAVE(0),
-        RIGHT_MASTER(0),
-        RIGHT_SLAVE(0),
-        INTAKE(0),
+        LEFT_MASTER(3),
+        LEFT_SLAVE(4),
+        RIGHT_MASTER(1),
+        RIGHT_SLAVE(2),
         TEST(0);
 
         private int _channel;

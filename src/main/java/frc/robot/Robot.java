@@ -9,26 +9,22 @@ package frc.robot;
 
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
-import frc.robot.subsystems.ControllerSubsystem;
+import frc.robot.commands.CommandByController;
 
 
 public class Robot extends TimedRobot {
-    private static final String DEFAULT_AUTO = "Default";
-    private static final String CUSTOM_AUTO = "My Auto";
-    private String autoSelected;
-    private final SendableChooser<String> chooser = new SendableChooser<>();
+
+    private Command _teleopCommand;
+
+    public Robot() {
+
+    }
 
     @Override
     public void robotInit() {
-        chooser.setDefaultOption("Default Auto", DEFAULT_AUTO);
-        chooser.addOption("My Auto", CUSTOM_AUTO);
-        SmartDashboard.putData("Auto choices", chooser);
-
-        ControllerSubsystem.getInstance();
+       _teleopCommand = new CommandByController();
     }
 
     @Override
@@ -37,25 +33,17 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        autoSelected = chooser.getSelected();
-        // autoSelected = SmartDashboard.getString("Auto Selector",
-        // defaultAuto);
-        System.out.println("Auto selected: " + autoSelected);
     }
 
     @Override
     public void autonomousPeriodic() {
-        Scheduler.getInstance().run();
 
-        switch (autoSelected)
-        {
-            case CUSTOM_AUTO:
-                // Put custom auto code here
-                break;
-            case DEFAULT_AUTO:
-            default:
-                // Put default auto code here
-                break;
+    }
+
+    @Override
+    public void teleopInit() {
+        if (_teleopCommand != null) {
+            _teleopCommand.start();
         }
     }
 
@@ -66,6 +54,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testPeriodic() {
-        Scheduler.getInstance().run();
+
     }
 }

@@ -8,22 +8,23 @@ import frc.robot.subsystems.ControllerSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 
-public class DriveRobot extends Command {
+public class CommandByController extends Command {
     private DrivetrainSubsystem _drive;
     private ControllerSubsystem _controller;
 
-    public DriveRobot() {
+    public CommandByController() {
         super("CommandByControllerAnalog");
 
         _drive = DrivetrainSubsystem.getInstance();
         requires(_drive);
 
         _controller = ControllerSubsystem.getInstance();
+        requires(_controller);
     }
 
     @Override
     protected void initialize() {
-
+        System.out.println("CommandByController initialized");
     }
 
     @Override
