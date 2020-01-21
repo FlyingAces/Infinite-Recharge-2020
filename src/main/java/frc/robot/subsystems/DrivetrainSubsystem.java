@@ -6,25 +6,28 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import edu.wpi.first.wpilibj.controller.PIDController;
-import edu.wpi.first.wpilibj2.command.PIDSubsystem;
+import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+
 
 import frc.robot.commands.DriveRobot;
 import frc.robot.config.MotorSpeeds;
 import frc.robot.config.RobotMap;
 
 
-public class DrivetrainSubsystem extends PIDSubsystem {
+public class DrivetrainSubsystem extends Subsystem { //extends PIDSubsystem {
 	private static DrivetrainSubsystem _instance;
 	private TalonSRX _leftWithEncoder;
 	private TalonSRX _rightWithEncoder;
 	private DifferentialDrive _wheels;
 
+
 	private DrivetrainSubsystem() {
-		super(new PIDController(1.0, 0.0, 0.0));
+		//super(new PIDController(1.0, 0.0, 0.0));
 
 		WPI_TalonSRX leftMaster = new WPI_TalonSRX(RobotMap.Talon.LEFT_MASTER.getChannel());
 		WPI_TalonSRX rightMaster = new WPI_TalonSRX(RobotMap.Talon.RIGHT_MASTER.getChannel());
@@ -63,6 +66,11 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		_rightWithEncoder.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
 	}
 
+	@Override
+	protected void initDefaultCommand() {
+		setDefaultCommand(new DriveRobot());
+	}
+
 	public void arcadeDrive(double moveValue, double rotateValue) {
 		if (DriverStation.getInstance().isOperatorControl()) {
 			moveValue *= MotorSpeeds.TELEOP_SPEED_MULTIPLIER;
@@ -92,6 +100,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		return _instance;
 	}
 
+
 	public int getCurrentLeftPosition() {
 		return _leftWithEncoder.getSelectedSensorPosition(0);
 	}
@@ -108,6 +117,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		return _rightWithEncoder.getSelectedSensorVelocity(0);
 	}
 
+	/*
 	@Override
 	protected void useOutput(double output, double setpoint) {
 		double leftMoveValue = output;
@@ -133,5 +143,6 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 			return getCurrentLeftPosition();
 		}
 	}
+	 */
 }
 

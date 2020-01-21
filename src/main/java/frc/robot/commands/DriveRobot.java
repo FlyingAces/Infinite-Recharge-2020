@@ -3,9 +3,12 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.command.Command;
 
+import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.config.RobotMap;
 import frc.robot.subsystems.ControllerSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
+
+import java.awt.*;
 
 
 public class DriveRobot extends Command {
@@ -33,6 +36,8 @@ public class DriveRobot extends Command {
         double driveAngle = _controller.getJoystick().getRawAxis(RobotMap.Controller.LEFT_AXIS_X.getChannel());
 
         _drive.arcadeDrive(driveSpeed, driveAngle);
+
+
     }
 
     @Override

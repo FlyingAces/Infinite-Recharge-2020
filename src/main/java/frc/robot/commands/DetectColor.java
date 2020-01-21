@@ -1,10 +1,12 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.command.Command;
+import frc.robot.config.RobotMap;
+import frc.robot.Robot;
 
-public class RunIntakeCommand extends Command {
+public class DetectColor extends Command {
+    public DetectColor(){
 
-    public RunIntakeCommand() {
     }
 
     @Override
@@ -14,7 +16,7 @@ public class RunIntakeCommand extends Command {
 
     @Override
     protected void execute() {
-    System.out.println("X");
+
     }
 
     @Override
@@ -29,6 +31,6 @@ public class RunIntakeCommand extends Command {
 
     @Override
     protected void interrupted() {
-
+        end();
     }
 }
