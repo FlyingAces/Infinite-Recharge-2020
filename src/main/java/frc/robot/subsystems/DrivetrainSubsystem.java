@@ -61,6 +61,8 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		_rightWithEncoder.setSensorPhase(true);
 		_rightWithEncoder.setSelectedSensorPosition((_rightWithEncoder.getSensorCollection().getPulseWidthPosition() & 0xfff), 0, RobotMap.K_TIMEOUT_MS);
 		_rightWithEncoder.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
+
+		getController().setTolerance(10.0); // Encoder ticks
 	}
 
 	public void arcadeDrive(double moveValue, double rotateValue) {
@@ -106,6 +108,10 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
 	public int getCurrentRightVelocity() {
 		return _rightWithEncoder.getSelectedSensorVelocity(0);
+	}
+
+	public boolean isOnTarget() {
+		return getController().atSetpoint();
 	}
 
 	@Override

@@ -16,7 +16,7 @@ public class DriveRobot extends Command {
         super("CommandByControllerAnalog");
 
         _drive = DrivetrainSubsystem.getInstance();
-        requires(_drive);
+        //requires(_drive);
 
         _controller = ControllerSubsystem.getInstance();
     }
