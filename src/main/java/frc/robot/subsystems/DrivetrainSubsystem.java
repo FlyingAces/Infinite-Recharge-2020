@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.commands.DriveRobot;
 import frc.robot.config.MotorSpeeds;
 import frc.robot.config.RobotMap;
+import frc.robot.util.Conversions;
 
 
 public class DrivetrainSubsystem extends PIDSubsystem {
@@ -115,6 +116,14 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 	}
 
 	@Override
+	public void setSetpoint(double dis){
+		_rightWithEncoder.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
+		_leftWithEncoder.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
+
+		super.setSetpoint(Conversions.inchToEncoderPosition(dis));
+	}
+
+	@Override
 	protected void useOutput(double output, double setpoint) {
 		double leftMoveValue = output;
 		double rightMoveValue = output;
@@ -140,4 +149,3 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		}
 	}
 }
-
