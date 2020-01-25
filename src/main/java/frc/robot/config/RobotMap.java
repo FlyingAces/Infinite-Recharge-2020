@@ -9,7 +9,7 @@ public class RobotMap {
         RIGHT_MASTER(1),
         RIGHT_SLAVE(2),
         INTAKE(0),
-        TEST(0);
+        TEST(5);
 
         private int _channel;
 
