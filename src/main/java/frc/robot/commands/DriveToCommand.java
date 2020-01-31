@@ -16,7 +16,7 @@ public class DriveToCommand implements Command {
 	public DriveToCommand(double distance) {
 		_drivetrain = DrivetrainSubsystem.getInstance();
 
-		_drivetrain.setSetpoint(distance);
+		_drivetrain.setSetpoint(distance, DrivetrainSubsystem.CommandType.STRAIGHT);
 	}
 
 	@Override

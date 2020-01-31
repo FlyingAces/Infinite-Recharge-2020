@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 
 import frc.robot.commands.DriveRobot;
@@ -24,6 +25,11 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 	private TalonSRX _leftWithEncoder;
 	private TalonSRX _rightWithEncoder;
 	private DifferentialDrive _wheels;
+	private CommandType _type;
+
+	public enum CommandType {
+		STRAIGHT, TURN;
+	}
 
 	private DrivetrainSubsystem() {
 		super(new PIDController(1.0, 0.0, 0.0));
@@ -35,6 +41,8 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
 		SpeedControllerGroup leftGroup = new SpeedControllerGroup(leftMaster, leftSlave);
 		SpeedControllerGroup rightGroup = new SpeedControllerGroup(rightMaster, rightSlave);
+
+		_type = CommandType.STRAIGHT;
 
 		_wheels = new DifferentialDrive(leftGroup, rightGroup);
 		_wheels.setSafetyEnabled(false);
@@ -116,12 +124,28 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		return getController().atSetpoint();
 	}
 
+	public void setCommandType(CommandType type) {
+		_type = type;
+	}
+
+	public void setSetpoint(double dis, CommandType type) {
+		setCommandType(type);
+		setSetpoint(dis);
+	}
+
 	@Override
 	public void setSetpoint(double dis){
 		_rightWithEncoder.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
 		_leftWithEncoder.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
 
-		super.setSetpoint(Conversions.inchToEncoderPosition(dis));
+		switch(_type) {
+			case STRAIGHT:
+				super.setSetpoint(Conversions.inchToEncoderPosition(dis));
+				break;
+			case TURN:
+				super.setSetpoint(Conversions.angleToEncoderPosition(dis));
+				break;
+		}
 	}
 
 	@Override
@@ -137,7 +161,14 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		else if(leftSpeed > rightSpeed)
 			leftMoveValue *= rightSpeed / leftSpeed;
 
-		tankDrive(leftMoveValue, rightMoveValue);
+		switch (_type) {
+			case STRAIGHT:
+				tankDrive(leftMoveValue, rightMoveValue);
+				break;
+			case TURN:
+				tankDrive(leftMoveValue, -rightMoveValue);
+				break;
+		}
 	}
 
 	@Override

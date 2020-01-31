@@ -2,10 +2,14 @@ package frc.robot.subsystems;
 
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.buttons.JoystickButton;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+//import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+
+import frc.robot.commands.DriveToCommand;
 import frc.robot.commands.TestCommand;
+import frc.robot.commands.TurnToCommand;
 import frc.robot.config.RobotMap;
 
 
@@ -18,10 +22,10 @@ public class ControllerSubsystem implements Subsystem {
         _joystick = new Joystick(RobotMap.Controller.JOYSTICK_PORT.getChannel());
 
         JoystickButton xButton = new JoystickButton(_joystick, RobotMap.Controller.X_BUTTON.getChannel());
-        xButton.toggleWhenPressed(new TestCommand(1.0));
+        xButton.toggleWhenPressed(new DriveToCommand(12.0));
 
         JoystickButton bButton = new JoystickButton(_joystick, RobotMap.Controller.B_BUTTON.getChannel());
-        bButton.toggleWhenPressed(new TestCommand(-1.0));
+        bButton.toggleWhenPressed(new DriveToCommand(-12.0));
     }
 
     public void initDefaultCommand() {

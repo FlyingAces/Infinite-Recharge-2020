@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 
 import edu.wpi.first.wpilibj2.command.Command;
+
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -16,7 +17,7 @@ public class TurnToCommand implements Command {
 	public TurnToCommand(double degree) {
 		_drivetrain =  DrivetrainSubsystem.getInstance();
 
-		_drivetrain.setSetpoint(degree);
+		_drivetrain.setSetpoint(degree, DrivetrainSubsystem.CommandType.TURN);
 	}
 
 	@Override
