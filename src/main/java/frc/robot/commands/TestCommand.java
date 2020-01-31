@@ -14,6 +14,7 @@ public class TestCommand extends Command {
 		_testSubsystem = TestSubsystem.getInstance();
 
 		_speed = speed;
+
 	}
 
 	@Override
@@ -23,8 +24,11 @@ public class TestCommand extends Command {
 
 	@Override
 	public void execute() {
-		_testSubsystem.runMotor(_speed);
-		System.out.println(_testSubsystem.getMotorPosition());
+	if (TestSubsystem.detectColors().equals("Blue")){
+		_testSubsystem.runMotor(1.0);
+	}
+//		_testSubsystem.runMotor(_speed);
+//		System.out.println(_testSubsystem.getMotorPosition());
 	}
 
 	@Override
