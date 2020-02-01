@@ -5,6 +5,8 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
+import frc.robot.commands.RunControlTerminalUntilColor;
+import frc.robot.commands.TurnControlTerminalThreeTimes;
 import frc.robot.config.RobotMap;
 
 
@@ -16,8 +18,11 @@ public class ControllerSubsystem extends Subsystem {
     private ControllerSubsystem() {
         _joystick = new Joystick(RobotMap.Controller.JOYSTICK_PORT.getChannel());
 
-        JoystickButton xButton = new JoystickButton(_joystick, RobotMap.Controller.Y_BUTTON.getChannel());
+        JoystickButton xButton = new JoystickButton(_joystick, RobotMap.Controller.X_BUTTON.getChannel());
+        xButton.whenPressed(new RunControlTerminalUntilColor("Green", 0.5));
 
+        JoystickButton bButton = new JoystickButton(_joystick, RobotMap.Controller.B_BUTTON.getChannel());
+        bButton.whenPressed(new TurnControlTerminalThreeTimes(0.5));
     }
 
     public void initDefaultCommand() {
@@ -25,10 +30,8 @@ public class ControllerSubsystem extends Subsystem {
     }
 
     public static ControllerSubsystem getInstance() {
-        if(_instance == null) {
+        if(_instance == null)
             _instance = new ControllerSubsystem();
-        }
-
         return _instance;
     }
 
@@ -36,4 +39,3 @@ public class ControllerSubsystem extends Subsystem {
         return _joystick;
     }
 }
-
