@@ -26,11 +26,6 @@ public class ControlTerminalSubsystem extends Subsystem {
 	private final ColorSensorV3 _colorSensor = new ColorSensorV3(_i2cPort);
 	private final ColorMatch _colorMatcher = new ColorMatch();
 
-	private final Color _kBlueTarget = ColorMatch.makeColor(0.143, 0.227, 0.429); //g 427
-	private final Color _kGreenTarget = ColorMatch.makeColor(0.197, 0.561, 0.240);
-	private final Color _kRedTarget = ColorMatch.makeColor(0.561, 0.232, 0.114);
-	private final Color _kYellowTarget = ColorMatch.makeColor(0.361, 0.524, 0.113);
-
 	public ControlTerminalSubsystem() {
 		WPI_TalonSRX controlTerminal = new WPI_TalonSRX(RobotMap.Talon.CONTROL_TERMINAL.getChannel());
 
@@ -47,10 +42,10 @@ public class ControlTerminalSubsystem extends Subsystem {
 		_controlTerminal.setSelectedSensorPosition(-(_controlTerminal.getSensorCollection().getPulseWidthPosition() & 0xfff), 0, RobotMap.K_TIMEOUT_MS);
 		_controlTerminal.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
 
-		_colorMatcher.addColorMatch(_kBlueTarget);
-		_colorMatcher.addColorMatch(_kGreenTarget);
-		_colorMatcher.addColorMatch(_kRedTarget);
-		_colorMatcher.addColorMatch(_kYellowTarget);
+		_colorMatcher.addColorMatch(RobotMap.BLUE_TARGET);
+		_colorMatcher.addColorMatch(RobotMap.GREEN_TARGET);
+		_colorMatcher.addColorMatch(RobotMap.RED_TARGET);
+		_colorMatcher.addColorMatch(RobotMap.YELLOW_TARGET);
 	}
 
 	public Color getDetectedColor() {
@@ -60,13 +55,13 @@ public class ControlTerminalSubsystem extends Subsystem {
 	public String getColorString() {
 		ColorMatchResult match = _colorMatcher.matchClosestColor(getDetectedColor());
 
-		if (match.color == _kBlueTarget) {
+		if (match.color == RobotMap.BLUE_TARGET) {
 			return "Blue";
-		} else if (match.color == _kRedTarget) {
+		} else if (match.color == RobotMap.RED_TARGET) {
 			return "Red";
-		} else if (match.color == _kGreenTarget) {
+		} else if (match.color == RobotMap.GREEN_TARGET) {
 			return "Green";
-		} else if (match.color == _kYellowTarget) {
+		} else if (match.color == RobotMap.YELLOW_TARGET) {
 			return "Yellow";
 		} else {
 			return "Unknown";

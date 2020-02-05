@@ -1,14 +1,16 @@
 package frc.robot.config;
 
+
 import com.revrobotics.ColorMatch;
 import edu.wpi.first.wpilibj.util.Color;
 
+
 public class RobotMap {
     public static final int K_TIMEOUT_MS = 30;
-    public static final Color kBlueTarget = com.revrobotics.ColorMatch.makeColor(0.143, 0.427, 0.429);
-    public static final Color kGreenTarget = com.revrobotics.ColorMatch.makeColor(0.197, 0.561, 0.240);
-    public static final Color kRedTarget = com.revrobotics.ColorMatch.makeColor(0.561, 0.232, 0.114);
-    public static final Color kYellowTarget = com.revrobotics.ColorMatch.makeColor(0.361, 0.524, 0.113);
+    public static final Color BLUE_TARGET = ColorMatch.makeColor(0.143, 0.427, 0.429);
+    public static final Color GREEN_TARGET = ColorMatch.makeColor(0.197, 0.561, 0.240);
+    public static final Color RED_TARGET = ColorMatch.makeColor(0.561, 0.232, 0.114);
+    public static final Color YELLOW_TARGET = ColorMatch.makeColor(0.361, 0.524, 0.113);
 
     public enum Talon {
         LEFT_MASTER(0),
