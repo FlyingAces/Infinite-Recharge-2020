@@ -1,33 +1,33 @@
 package frc.robot.commands;
 
 
-import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj2.command.Command;
 
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.config.RobotMap;
 import frc.robot.subsystems.ControllerSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
+import java.util.HashSet;
+import java.util.Set;
 
-public class DriveRobot extends Command {
+
+public class DriveRobot implements Command {
     private DrivetrainSubsystem _drive;
     private ControllerSubsystem _controller;
 
     public DriveRobot() {
-        super("CommandByControllerAnalog");
-
         _drive = DrivetrainSubsystem.getInstance();
-        //requires(_drive);
 
         _controller = ControllerSubsystem.getInstance();
     }
 
     @Override
-    protected void initialize() {
-
+    public void initialize() {
     }
 
     @Override
-    protected void execute() {
+    public void execute() {
         double driveSpeed = _controller.getJoystick().getRawAxis(RobotMap.Controller.AXIS_TRIGGER_RT.getChannel()) -
                 _controller.getJoystick().getRawAxis(RobotMap.Controller.AXIS_TRIGGER_LT.getChannel());
         double driveAngle = _controller.getJoystick().getRawAxis(RobotMap.Controller.LEFT_AXIS_X.getChannel());
@@ -36,17 +36,19 @@ public class DriveRobot extends Command {
     }
 
     @Override
-    protected boolean isFinished() {
+    public boolean isFinished() {
         return false;
     }
 
     @Override
-    protected void end() {
-        _drive.tankDrive(0, 0);
+    public Set<Subsystem> getRequirements() {
+        Set<Subsystem> requirements = new HashSet<>();
+        requirements.add(_drive);
+        return requirements;
     }
 
     @Override
-    protected void interrupted() {
-        end();
+    public void end(boolean interrupted) {
+        _drive.tankDrive(0, 0);
     }
 }

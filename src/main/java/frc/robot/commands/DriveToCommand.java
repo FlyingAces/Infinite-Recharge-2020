@@ -12,31 +12,38 @@ import java.util.Set;
 
 public class DriveToCommand implements Command {
 	private DrivetrainSubsystem _drivetrain;
+	private double _distance;
 
 	public DriveToCommand(double distance) {
 		_drivetrain = DrivetrainSubsystem.getInstance();
 
-		_drivetrain.setSetpoint(distance, DrivetrainSubsystem.CommandType.STRAIGHT);
+		_distance = distance;
 	}
 
 	@Override
 	public void initialize(){
+		System.out.println("DriveTo init");
+		_drivetrain.setSetpoint(_distance, DrivetrainSubsystem.CommandType.STRAIGHT);
 		_drivetrain.enable();
 	}
 
 	@Override
 	public void execute() {
+		System.out.println("DriveTo exe");
 	}
 
 	@Override
 	public boolean isFinished() {
-		return _drivetrain.isOnTarget();
+		System.out.println(_drivetrain.getCurrentLeftPosition());
+		System.out.println(_drivetrain.getCurrentRightPosition());
+		return _drivetrain.isOnTarget() && false;
 	}
 
 	@Override
 	public void end(boolean interrupted) {
 		_drivetrain.tankDrive(0.0, 0.0);
 		_drivetrain.disable();
+		System.out.println("DriveTo end");
 	}
 
 	@Override

@@ -4,47 +4,51 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
+import com.ctre.phoenix.motorcontrol.can.*;
 
+import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import frc.robot.config.RobotMap;
 
 
-public class TestSubsystem implements Subsystem {
+public class TestSubsystem extends PIDSubsystem {
 	private static TestSubsystem _instance;
 
-	private TalonSRX _testMotor;
+	private TalonFX _testMotor;
 
 	public TestSubsystem() {
-		WPI_TalonSRX testMotor = new WPI_TalonSRX(RobotMap.Talon.TEST.getChannel());
+		super(new PIDController(20.0, 0.1, 0.0));
+
+		WPI_TalonFX testMotor = new WPI_TalonFX(RobotMap.Talon.TEST.getChannel());
 
 		_testMotor = testMotor;
 
-		_testMotor.configFactoryDefault();
-		_testMotor.setNeutralMode(NeutralMode.Brake);
-		_testMotor.configNominalOutputForward(0, RobotMap.K_TIMEOUT_MS);
-		_testMotor.configNominalOutputReverse(0, RobotMap.K_TIMEOUT_MS);
-		_testMotor.configPeakOutputForward(1.0, RobotMap.K_TIMEOUT_MS);
-		_testMotor.configPeakOutputReverse(-1.0, RobotMap.K_TIMEOUT_MS);
-		_testMotor.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, RobotMap.K_TIMEOUT_MS);
-		_testMotor.setSensorPhase(true);
-		_testMotor.setSelectedSensorPosition(-(_testMotor.getSensorCollection().getPulseWidthPosition() & 0xfff), 0, RobotMap.K_TIMEOUT_MS);
-		_testMotor.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
+		TalonFXConfiguration config = new TalonFXConfiguration();
+		config.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
+		_testMotor.configAllSettings(config);
+		_testMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
+		_testMotor.setInverted(false);
+		_testMotor.setSelectedSensorPosition(0);
 	}
 
 	public void runMotor(double speed) {
 		_testMotor.set(ControlMode.PercentOutput, speed);
 	}
 
-	public int getMotorPosition() {
-		return _testMotor.getSelectedSensorPosition();
+	public double getMotorPosition() {
+		return _testMotor.getSelectedSensorPosition(0);
 	}
 
-	public int getMotorVelocity() {
-		return _testMotor.getSelectedSensorVelocity();
+	public void zeroPosition() {
+		_testMotor.setSelectedSensorPosition(0);
+	}
+
+	public double getMotorVelocity() {
+		return _testMotor.getSensorCollection().getIntegratedSensorVelocity();
 	}
 
 	public static TestSubsystem getInstance() {
@@ -56,5 +60,17 @@ public class TestSubsystem implements Subsystem {
 	@Override
 	public void setDefaultCommand(Command defaultCommand) {
 
+	}
+
+	@Override
+	protected void useOutput(double output, double setpoint) {
+		System.out.println("Output: " + output);
+		output /= setpoint;
+		_testMotor.set(ControlMode.PercentOutput, output);
+	}
+
+	@Override
+	protected double getMeasurement() {
+		return _testMotor.getSelectedSensorPosition(0);
 	}
 }

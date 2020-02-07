@@ -3,7 +3,9 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -22,8 +24,8 @@ import frc.robot.util.Conversions;
 
 public class DrivetrainSubsystem extends PIDSubsystem {
 	private static DrivetrainSubsystem _instance;
-	private TalonSRX _leftWithEncoder;
-	private TalonSRX _rightWithEncoder;
+	private TalonFX _leftWithEncoder;
+	private TalonFX _rightWithEncoder;
 	private DifferentialDrive _wheels;
 	private CommandType _type;
 
@@ -34,10 +36,10 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 	private DrivetrainSubsystem() {
 		super(new PIDController(1.0, 0.0, 0.0));
 
-		WPI_TalonSRX leftMaster = new WPI_TalonSRX(RobotMap.Talon.LEFT_MASTER.getChannel());
-		WPI_TalonSRX rightMaster = new WPI_TalonSRX(RobotMap.Talon.RIGHT_MASTER.getChannel());
-		WPI_TalonSRX leftSlave = new WPI_TalonSRX(RobotMap.Talon.LEFT_SLAVE.getChannel());
-		WPI_TalonSRX rightSlave = new WPI_TalonSRX(RobotMap.Talon.RIGHT_SLAVE.getChannel());
+		WPI_TalonFX leftMaster = new WPI_TalonFX(RobotMap.Talon.LEFT_MASTER.getChannel());
+		WPI_TalonFX rightMaster = new WPI_TalonFX(RobotMap.Talon.RIGHT_MASTER.getChannel());
+		WPI_TalonFX leftSlave = new WPI_TalonFX(RobotMap.Talon.LEFT_SLAVE.getChannel());
+		WPI_TalonFX rightSlave = new WPI_TalonFX(RobotMap.Talon.RIGHT_SLAVE.getChannel());
 
 		SpeedControllerGroup leftGroup = new SpeedControllerGroup(leftMaster, leftSlave);
 		SpeedControllerGroup rightGroup = new SpeedControllerGroup(rightMaster, rightSlave);
@@ -58,8 +60,8 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		_leftWithEncoder.configPeakOutputReverse(-1.0, RobotMap.K_TIMEOUT_MS);
 		_leftWithEncoder.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, RobotMap.K_TIMEOUT_MS);
 		_leftWithEncoder.setSensorPhase(true);
-		_leftWithEncoder.setSelectedSensorPosition(-(_leftWithEncoder.getSensorCollection().getPulseWidthPosition() & 0xfff), 0, RobotMap.K_TIMEOUT_MS);
-		_leftWithEncoder.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
+		//_leftWithEncoder.setSelectedSensorPosition(-(_leftWithEncoder.getSensorCollection().getPulseWidthPosition() & 0xfff), 0, RobotMap.K_TIMEOUT_MS);
+		_leftWithEncoder.getSensorCollection().setIntegratedSensorPosition(0, RobotMap.K_TIMEOUT_MS);
 
 		_rightWithEncoder.configFactoryDefault();
 		_rightWithEncoder.setNeutralMode(NeutralMode.Brake);
@@ -69,8 +71,8 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		_rightWithEncoder.configPeakOutputReverse(-1.0, RobotMap.K_TIMEOUT_MS);
 		_rightWithEncoder.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, RobotMap.K_TIMEOUT_MS);
 		_rightWithEncoder.setSensorPhase(true);
-		_rightWithEncoder.setSelectedSensorPosition((_rightWithEncoder.getSensorCollection().getPulseWidthPosition() & 0xfff), 0, RobotMap.K_TIMEOUT_MS);
-		_rightWithEncoder.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
+		//_rightWithEncoder.setSelectedSensorPosition((_rightWithEncoder.getSensorCollection().getPulseWidthPosition() & 0xfff), 0, RobotMap.K_TIMEOUT_MS);
+		_rightWithEncoder.getSensorCollection().setIntegratedSensorPosition(0, RobotMap.K_TIMEOUT_MS);
 
 		getController().setTolerance(10.0); // Encoder ticks
 	}
@@ -94,7 +96,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 			leftMoveValue *= MotorSpeeds.AUTONOMOUS_SPEED_MULTIPLIER;
 		}
 
-		_wheels.tankDrive(leftMoveValue, rightMoveValue);
+		_wheels.tankDrive(leftMoveValue * MotorSpeeds.DRIVE_ACCELERATION_SPEED, rightMoveValue * MotorSpeeds.DRIVE_ACCELERATION_SPEED);
 	}
 
 	public static DrivetrainSubsystem getInstance(){
@@ -104,20 +106,20 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		return _instance;
 	}
 
-	public int getCurrentLeftPosition() {
-		return _leftWithEncoder.getSelectedSensorPosition(0);
+	public double getCurrentLeftPosition() {
+		return _leftWithEncoder.getSensorCollection().getIntegratedSensorPosition();
 	}
 
-	public int getCurrentLeftVelocity() {
-		return _leftWithEncoder.getSelectedSensorVelocity(0);
+	public double getCurrentLeftVelocity() {
+		return _leftWithEncoder.getSensorCollection().getIntegratedSensorVelocity();
 	}
 
-	public int getCurrentRightPosition() {
-		return _rightWithEncoder.getSelectedSensorPosition(0);
+	public double getCurrentRightPosition() {
+		return _rightWithEncoder.getSensorCollection().getIntegratedSensorPosition();
 	}
 
-	public int getCurrentRightVelocity() {
-		return _rightWithEncoder.getSelectedSensorVelocity(0);
+	public double getCurrentRightVelocity() {
+		return _rightWithEncoder.getSensorCollection().getIntegratedSensorVelocity();
 	}
 
 	public boolean isOnTarget() {
@@ -135,21 +137,26 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
 	@Override
 	public void setSetpoint(double dis){
-		_rightWithEncoder.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
-		_leftWithEncoder.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
+		if(_rightWithEncoder != null && _leftWithEncoder != null) {
+			_rightWithEncoder.getSensorCollection().setIntegratedSensorPosition(0, RobotMap.K_TIMEOUT_MS);
+			_leftWithEncoder.getSensorCollection().setIntegratedSensorPosition(0, RobotMap.K_TIMEOUT_MS);
 
-		switch(_type) {
-			case STRAIGHT:
-				super.setSetpoint(Conversions.inchToEncoderPosition(dis));
-				break;
-			case TURN:
-				super.setSetpoint(Conversions.angleToEncoderPosition(dis));
-				break;
-		}
+			switch (_type) {
+				case STRAIGHT:
+					super.setSetpoint(Conversions.inchToEncoderPosition(dis));
+					break;
+				case TURN:
+					super.setSetpoint(Conversions.angleToEncoderPosition(dis));
+					break;
+			}
+			System.out.println("total : " + Conversions.inchToEncoderPosition(dis));
+		} else
+			super.setSetpoint(dis);
 	}
 
 	@Override
 	protected void useOutput(double output, double setpoint) {
+		System.out.println("Output : " + output + ", setpoint : " + setpoint);
 		double leftMoveValue = output;
 		double rightMoveValue = output;
 
@@ -173,6 +180,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
 	@Override
 	protected double getMeasurement() {
+		System.out.println("Getting measurement");
 		double setpoint = getController().getSetpoint();
 		if(Math.abs(setpoint - getCurrentLeftPosition()) < Math.abs(setpoint - getCurrentRightPosition())) {
 			return getCurrentRightPosition();
