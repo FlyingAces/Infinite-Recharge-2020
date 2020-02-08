@@ -2,21 +2,16 @@ package frc.robot.subsystems;
 
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
+import com.ctre.phoenix.motorcontrol.can.*;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 
-import frc.robot.commands.DriveRobot;
 import frc.robot.config.MotorSpeeds;
 import frc.robot.config.RobotMap;
 import frc.robot.util.Conversions;
@@ -52,27 +47,18 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		_leftWithEncoder = leftMaster;
 		_rightWithEncoder = rightMaster;
 
-		_leftWithEncoder.configFactoryDefault();
-		_leftWithEncoder.setNeutralMode(NeutralMode.Brake);
-		_leftWithEncoder.configNominalOutputForward(0, RobotMap.K_TIMEOUT_MS);
-		_leftWithEncoder.configNominalOutputReverse(0, RobotMap.K_TIMEOUT_MS);
-		_leftWithEncoder.configPeakOutputForward(1.0, RobotMap.K_TIMEOUT_MS);
-		_leftWithEncoder.configPeakOutputReverse(-1.0, RobotMap.K_TIMEOUT_MS);
-		_leftWithEncoder.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, RobotMap.K_TIMEOUT_MS);
-		_leftWithEncoder.setSensorPhase(true);
-		//_leftWithEncoder.setSelectedSensorPosition(-(_leftWithEncoder.getSensorCollection().getPulseWidthPosition() & 0xfff), 0, RobotMap.K_TIMEOUT_MS);
-		_leftWithEncoder.getSensorCollection().setIntegratedSensorPosition(0, RobotMap.K_TIMEOUT_MS);
+		TalonFXConfiguration config = new TalonFXConfiguration();
+		config.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
 
-		_rightWithEncoder.configFactoryDefault();
-		_rightWithEncoder.setNeutralMode(NeutralMode.Brake);
-		_rightWithEncoder.configNominalOutputForward(0, RobotMap.K_TIMEOUT_MS);
-		_rightWithEncoder.configNominalOutputReverse(0, RobotMap.K_TIMEOUT_MS);
-		_rightWithEncoder.configPeakOutputForward(1.0, RobotMap.K_TIMEOUT_MS);
-		_rightWithEncoder.configPeakOutputReverse(-1.0, RobotMap.K_TIMEOUT_MS);
-		_rightWithEncoder.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, RobotMap.K_TIMEOUT_MS);
-		_rightWithEncoder.setSensorPhase(true);
-		//_rightWithEncoder.setSelectedSensorPosition((_rightWithEncoder.getSensorCollection().getPulseWidthPosition() & 0xfff), 0, RobotMap.K_TIMEOUT_MS);
-		_rightWithEncoder.getSensorCollection().setIntegratedSensorPosition(0, RobotMap.K_TIMEOUT_MS);
+		_leftWithEncoder.configAllSettings(config);
+		_leftWithEncoder.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
+		_leftWithEncoder.setInverted(false);
+		_leftWithEncoder.setSelectedSensorPosition(0);
+
+		_rightWithEncoder.configAllSettings(config);
+		_rightWithEncoder.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
+		_rightWithEncoder.setInverted(false);
+		_rightWithEncoder.setSelectedSensorPosition(0);
 
 		getController().setTolerance(10.0); // Encoder ticks
 	}
@@ -106,20 +92,25 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		return _instance;
 	}
 
+	public void zeroDrivetrain() {
+		_leftWithEncoder.setSelectedSensorPosition(0);
+		_rightWithEncoder.setSelectedSensorPosition(0);
+	}
+
 	public double getCurrentLeftPosition() {
-		return _leftWithEncoder.getSensorCollection().getIntegratedSensorPosition();
+		return _leftWithEncoder.getSelectedSensorPosition(0);
 	}
 
 	public double getCurrentLeftVelocity() {
-		return _leftWithEncoder.getSensorCollection().getIntegratedSensorVelocity();
+		return _leftWithEncoder.getSelectedSensorVelocity(0);
 	}
 
 	public double getCurrentRightPosition() {
-		return _rightWithEncoder.getSensorCollection().getIntegratedSensorPosition();
+		return _rightWithEncoder.getSelectedSensorPosition(0);
 	}
 
 	public double getCurrentRightVelocity() {
-		return _rightWithEncoder.getSensorCollection().getIntegratedSensorVelocity();
+		return _rightWithEncoder.getSelectedSensorVelocity(0);
 	}
 
 	public boolean isOnTarget() {

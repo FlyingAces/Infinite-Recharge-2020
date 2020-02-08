@@ -22,28 +22,27 @@ public class DriveToCommand implements Command {
 
 	@Override
 	public void initialize(){
-		System.out.println("DriveTo init");
 		_drivetrain.setSetpoint(_distance, DrivetrainSubsystem.CommandType.STRAIGHT);
 		_drivetrain.enable();
+		execute();
 	}
 
 	@Override
 	public void execute() {
-		System.out.println("DriveTo exe");
+		System.out.println("Left: " + _drivetrain.getCurrentLeftPosition() + " || Right: " + _drivetrain.getCurrentRightPosition());
 	}
 
 	@Override
 	public boolean isFinished() {
-		System.out.println(_drivetrain.getCurrentLeftPosition());
-		System.out.println(_drivetrain.getCurrentRightPosition());
-		return _drivetrain.isOnTarget() && false;
+		//return _drivetrain.isOnTarget();
+		return false;
 	}
 
 	@Override
 	public void end(boolean interrupted) {
 		_drivetrain.tankDrive(0.0, 0.0);
 		_drivetrain.disable();
-		System.out.println("DriveTo end");
+		_drivetrain.zeroDrivetrain();
 	}
 
 	@Override

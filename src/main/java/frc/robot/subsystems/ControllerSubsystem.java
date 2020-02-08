@@ -23,11 +23,11 @@ public class ControllerSubsystem extends Subsystem {
 
         JoystickButton xButton = new JoystickButton(_joystick, RobotMap.Controller.X_BUTTON.getChannel());
         //xButton.whenPressed(new DriveToCommand(12.0));
-        xButton.toggleWhenPressed(new TestCommand(1.0));
+        xButton.toggleWhenPressed(new TestCommand(0.3));
 
         JoystickButton bButton = new JoystickButton(_joystick, RobotMap.Controller.B_BUTTON.getChannel());
         //bButton.whenPressed(new DriveToCommand(-12.0));
-        //bButton.toggleWhenPressed(new TestCommand(-1.0));
+        bButton.toggleWhenPressed(new TestCommand(0.3));
     }
 
     public void initDefaultCommand() {

@@ -3,14 +3,13 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.*;
 
 import edu.wpi.first.wpilibj.controller.PIDController;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import frc.robot.config.RobotMap;
 
@@ -32,7 +31,6 @@ public class TestSubsystem extends PIDSubsystem {
 		_testMotor.configAllSettings(config);
 		_testMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
 		_testMotor.setInverted(false);
-		_testMotor.setSelectedSensorPosition(0);
 	}
 
 	public void runMotor(double speed) {
@@ -48,7 +46,7 @@ public class TestSubsystem extends PIDSubsystem {
 	}
 
 	public double getMotorVelocity() {
-		return _testMotor.getSensorCollection().getIntegratedSensorVelocity();
+		return _testMotor.getSelectedSensorVelocity(0);
 	}
 
 	public static TestSubsystem getInstance() {
@@ -64,7 +62,6 @@ public class TestSubsystem extends PIDSubsystem {
 
 	@Override
 	protected void useOutput(double output, double setpoint) {
-		System.out.println("Output: " + output);
 		output /= setpoint;
 		_testMotor.set(ControlMode.PercentOutput, output);
 	}

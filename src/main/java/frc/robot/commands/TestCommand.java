@@ -23,18 +23,15 @@ public class TestCommand implements Command {
 
 	@Override
 	public void initialize() {
-		_testSubsystem.setSetpoint(500000);
+		_testSubsystem.zeroPosition();
+		_testSubsystem.setSetpoint(500000); // Encoder ticks
 		_testSubsystem.enable();
 		execute();
 	}
 
 	@Override
 	public void execute() {
-		//_testSubsystem.runMotor(_speed);
-		if (_count++ > 10) {
-			System.out.println("Motor position: " + _testSubsystem.getMotorPosition());
-			_count = 0;
-		}
+		System.out.println("Position: " + _testSubsystem.getMotorPosition());
 	}
 
 	@Override
@@ -52,5 +49,6 @@ public class TestCommand implements Command {
 	@Override
 	public void end(boolean interrupted) {
 		_testSubsystem.runMotor(0.0);
+		_testSubsystem.zeroPosition();
 	}
 }
