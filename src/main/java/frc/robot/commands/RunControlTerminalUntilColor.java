@@ -1,12 +1,16 @@
 package frc.robot.commands;
 
 
-import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import frc.robot.subsystems.ControlTerminalSubsystem;
 
+import java.util.HashSet;
+import java.util.Set;
 
-public class RunControlTerminalUntilColor extends Command {
+
+public class RunControlTerminalUntilColor implements Command {
 	private ControlTerminalSubsystem _controlTerminal;
 	private String _color;
 	private double _speed;
@@ -19,28 +23,29 @@ public class RunControlTerminalUntilColor extends Command {
 	}
 
 	@Override
-	protected void initialize() {
+	public void initialize() {
 		execute();
 	}
 
 	@Override
-	protected void execute() {
+	public void execute() {
 		_controlTerminal.runControlTerminal(_speed);
-		System.out.println(_controlTerminal.getEncoderPosition());
 	}
 
 	@Override
-	protected boolean isFinished() {
+	public boolean isFinished() {
 		return _controlTerminal.getColorString().equals(_color);
 	}
 
 	@Override
-	protected void end() {
-		_controlTerminal.runControlTerminal(0.0);
+	public Set<Subsystem> getRequirements() {
+		Set<Subsystem> requirements = new HashSet<>();
+		requirements.add(_controlTerminal);
+		return requirements;
 	}
 
 	@Override
-	protected void interrupted() {
-		end();
+	public void end(boolean interrupted) {
+		_controlTerminal.runControlTerminal(0.0);
 	}
 }

@@ -1,13 +1,17 @@
 package frc.robot.commands;
 
 
-import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import frc.robot.config.RobotMap;
 import frc.robot.subsystems.ControlTerminalSubsystem;
 
+import java.util.HashSet;
+import java.util.Set;
 
-public class TurnControlTerminal extends Command {
+
+public class TurnControlTerminal implements Command {
 	private ControlTerminalSubsystem _controlTerminal;
 
 	private double _speed;
@@ -15,37 +19,37 @@ public class TurnControlTerminal extends Command {
 
 	public TurnControlTerminal(double speed, int rotations) {
 		_controlTerminal = ControlTerminalSubsystem.getInstance();
-		requires(_controlTerminal);
 
 		_speed = speed;
 		_rotations = rotations;
 	}
 
 	@Override
-	protected void initialize() {
+	public void initialize() {
 		execute();
 	}
 
 	@Override
-	protected void execute() {
+	public void execute() {
 		_controlTerminal.runControlTerminal(_speed);
-		System.out.println(_controlTerminal.getEncoderPosition());
 	}
 
 	@Override
-	protected boolean isFinished() {
+	public boolean isFinished() {
 		return _controlTerminal.getEncoderPosition() >=
-				((32.0 / RobotMap.Measurement.CONTROL_TERMINAL_WHEEL_DIAMETER.getInches()) * 4096) * _rotations;
+				((RobotMap.FieldElementMeasurement.FIELD_CONTROL_TERMINAL.getInches() / RobotMap.RobotMeasurement.CONTROL_TERMINAL_WHEEL_DIAMETER.getInches()) * 4096) * _rotations;
 	}
 
 	@Override
-	protected void end() {
-		_controlTerminal.resetEncoder();
+	public Set<Subsystem> getRequirements() {
+		Set<Subsystem> requirements = new HashSet<>();
+		requirements.add(_controlTerminal);
+		return requirements;
+	}
+
+	@Override
+	public void end(boolean interrupted) {
 		_controlTerminal.runControlTerminal(0.0);
-	}
-
-	@Override
-	protected void interrupted() {
-		end();
+		_controlTerminal.resetEncoder();
 	}
 }

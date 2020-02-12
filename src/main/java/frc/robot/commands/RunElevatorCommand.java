@@ -1,22 +1,25 @@
 package frc.robot.commands;
 
 
-import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import frc.robot.subsystems.ControlTerminalSubsystem;
 
+import java.util.HashSet;
+import java.util.Set;
 
-public class RunElevatorCommand extends Command {
+
+public class RunElevatorCommand implements Command {
 	private ControlTerminalSubsystem _elevator;
 
 
 	public RunElevatorCommand() {
 		_elevator = ControlTerminalSubsystem.getInstance();
-		requires(_elevator);
 	}
 
 	@Override
-	protected void initialize() {
+	public void initialize() {
 		switch (_elevator.getElevatorDirection()) {
 			case DOWN:
 				_elevator.runElevator(ControlTerminalSubsystem.ElevatorDirection.UP);
@@ -28,22 +31,25 @@ public class RunElevatorCommand extends Command {
 	}
 
 	@Override
-	protected void execute() {
+	public void execute() {
 
 	}
 
 	@Override
-	protected boolean isFinished() {
+	public boolean isFinished() {
 		return _elevator.isElevatorFinished();
 	}
 
 	@Override
-	protected void end() {
-		_elevator.stopElevator();
+	public Set<Subsystem> getRequirements() {
+		Set<Subsystem> requirements = new HashSet<>();
+		requirements.add(_elevator);
+		return requirements;
 	}
 
 	@Override
-	protected void interrupted() {
-		end();
+	public void end(boolean interrupted) {
+		_elevator.stopElevator();
 	}
+
 }
