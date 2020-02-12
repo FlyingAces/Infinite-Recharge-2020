@@ -4,14 +4,10 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.util.Color;
-
-import com.revrobotics.ColorSensorV3;
-import com.revrobotics.ColorMatchResult;
-import com.revrobotics.ColorMatch;
 
 import frc.robot.commands.RunControlTerminalUntilColor;
-import frc.robot.commands.TurnControlTerminalThreeTimes;
+import frc.robot.commands.RunElevatorCommand;
+import frc.robot.commands.TurnControlTerminal;
 import frc.robot.config.RobotMap;
 
 
@@ -27,7 +23,13 @@ public class ControllerSubsystem extends Subsystem {
         xButton.whenPressed(new RunControlTerminalUntilColor("Green", 0.5));
 
         JoystickButton bButton = new JoystickButton(_joystick, RobotMap.Controller.B_BUTTON.getChannel());
-        bButton.whenPressed(new TurnControlTerminalThreeTimes(0.5));
+        bButton.whenPressed(new TurnControlTerminal(0.5, 3));
+
+//        JoystickButton yButton = new JoystickButton(_joystick, RobotMap.Controller.Y_BUTTON.getChannel());
+//        yButton.whenPressed(new RunElevatorCommand(1.0));
+
+        JoystickButton aButton = new JoystickButton(_joystick, RobotMap.Controller.A_BUTTON.getChannel());
+        aButton.whenPressed(new RunElevatorCommand());
     }
 
     public void initDefaultCommand() {

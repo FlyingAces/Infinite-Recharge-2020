@@ -15,9 +15,11 @@ public class RobotMap {
     public enum Talon {
         LEFT_MASTER(0),
         LEFT_SLAVE(0),
+        
         RIGHT_MASTER(0),
         RIGHT_SLAVE(0),
-        CONTROL_TERMINAL(5);
+        CONTROL_TERMINAL(5),
+        CONTROL_TERMINAL_ELEVATOR(4);
 
         private int _channel;
 

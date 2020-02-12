@@ -7,21 +7,22 @@ import frc.robot.config.RobotMap;
 import frc.robot.subsystems.ControlTerminalSubsystem;
 
 
-public class TurnControlTerminalThreeTimes extends Command {
+public class TurnControlTerminal extends Command {
 	private ControlTerminalSubsystem _controlTerminal;
 
 	private double _speed;
+	private int _rotations;
 
-	public TurnControlTerminalThreeTimes(double speed) {
+	public TurnControlTerminal(double speed, int rotations) {
 		_controlTerminal = ControlTerminalSubsystem.getInstance();
 		requires(_controlTerminal);
 
 		_speed = speed;
+		_rotations = rotations;
 	}
 
 	@Override
 	protected void initialize() {
-		_controlTerminal.resetEncoder();
 		execute();
 	}
 
@@ -34,11 +35,12 @@ public class TurnControlTerminalThreeTimes extends Command {
 	@Override
 	protected boolean isFinished() {
 		return _controlTerminal.getEncoderPosition() >=
-				((32.0 / RobotMap.Measurement.CONTROL_TERMINAL_WHEEL_DIAMETER.getInches()) * 4096) * 3;
+				((32.0 / RobotMap.Measurement.CONTROL_TERMINAL_WHEEL_DIAMETER.getInches()) * 4096) * _rotations;
 	}
 
 	@Override
 	protected void end() {
+		_controlTerminal.resetEncoder();
 		_controlTerminal.runControlTerminal(0.0);
 	}
 

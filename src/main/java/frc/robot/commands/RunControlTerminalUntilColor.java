@@ -26,6 +26,7 @@ public class RunControlTerminalUntilColor extends Command {
 	@Override
 	protected void execute() {
 		_controlTerminal.runControlTerminal(_speed);
+		System.out.println(_controlTerminal.getEncoderPosition());
 	}
 
 	@Override
