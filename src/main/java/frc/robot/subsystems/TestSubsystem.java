@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 
 import frc.robot.config.RobotMap;
+import frc.robot.util.Conversions;
 
 
 public class TestSubsystem extends PIDSubsystem {
@@ -62,8 +63,8 @@ public class TestSubsystem extends PIDSubsystem {
 
 	@Override
 	protected void useOutput(double output, double setpoint) {
-		output /= setpoint;
-		_testMotor.set(ControlMode.PercentOutput, output);
+		double percentOutput = Conversions.encoderPositionToInches(Math.abs(setpoint) - Math.abs(output)) / 12.0;
+		_testMotor.set(ControlMode.PercentOutput, percentOutput);
 	}
 
 	@Override
