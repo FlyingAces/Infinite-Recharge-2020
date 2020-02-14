@@ -23,6 +23,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 	private TalonFX _rightWithEncoder;
 	private DifferentialDrive _wheels;
 	private CommandType _type;
+	private double _pidZoneBuffer;
 
 	public enum CommandType {
 		STRAIGHT, TURN;
@@ -59,6 +60,8 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		_rightWithEncoder.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
 		_rightWithEncoder.setInverted(false);
 		_rightWithEncoder.setSelectedSensorPosition(0);
+
+		_pidZoneBuffer = 0.0;
 
 		getController().setTolerance(10.0); // Encoder ticks
 	}
@@ -126,6 +129,15 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		setSetpoint(dis);
 	}
 
+	/***
+	 * Set the zone in which the PID output takes effect.
+	 * The PID zone is 0.0 by default.
+	 * @param inches The effective PID zone in inches.
+	 */
+	public void setPIDZoneBuffer(double inches) {
+		_pidZoneBuffer = inches;
+	}
+
 	@Override
 	public void setSetpoint(double dis){
 		if(_rightWithEncoder != null && _leftWithEncoder != null) {
@@ -148,8 +160,11 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 	@Override
 	protected void useOutput(double output, double setpoint) {
 		System.out.println("Output : " + output + ", setpoint : " + setpoint);
-		double leftMoveValue = output;
-		double rightMoveValue = output;
+
+		double percentOutput = Conversions.encoderPositionToInches(Math.abs(setpoint) - Math.abs(output) / _pidZoneBuffer);
+
+		double leftMoveValue = percentOutput;
+		double rightMoveValue = percentOutput;
 
 		double rightSpeed = Math.abs(getCurrentRightVelocity());
 		double leftSpeed = Math.abs(getCurrentLeftVelocity());
@@ -172,7 +187,9 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 	@Override
 	protected double getMeasurement() {
 		System.out.println("Getting measurement");
+
 		double setpoint = getController().getSetpoint();
+
 		if(Math.abs(setpoint - getCurrentLeftPosition()) < Math.abs(setpoint - getCurrentRightPosition())) {
 			return getCurrentRightPosition();
 		} else {
