@@ -10,15 +10,18 @@ import com.revrobotics.ColorMatchResult;
 import com.revrobotics.ColorSensorV3;
 
 import edu.wpi.first.wpilibj.I2C;
-import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+
+
 import frc.robot.config.RobotMap;
 
 
-public class ControlTerminalSubsystem extends Subsystem {
+public class ControlTerminalSubsystem implements Subsystem {
 	private static ControlTerminalSubsystem _instance;
 	private TalonSRX _controlTerminal;
 	private TalonSRX _elevator;
@@ -26,6 +29,7 @@ public class ControlTerminalSubsystem extends Subsystem {
 	private final I2C.Port _i2cPort = I2C.Port.kOnboard;
 	private final ColorSensorV3 _colorSensor = new ColorSensorV3(_i2cPort);
 	private final ColorMatch _colorMatcher = new ColorMatch();
+
 	private ElevatorDirection _elevatorDirection;
 
 
@@ -156,7 +160,11 @@ public class ControlTerminalSubsystem extends Subsystem {
 	}
 
 	public void runControlTerminal(double speed) {
-		_controlTerminal.set(ControlMode.PercentOutput, speed);
+		if (_elevator.isRevLimitSwitchClosed() == 1 || _elevatorDirection == ElevatorDirection.DOWN) {
+			_controlTerminal.set(ControlMode.PercentOutput, 0.0);
+		} else {
+			_controlTerminal.set(ControlMode.PercentOutput, speed);
+		}
 	}
 
 	public ElevatorDirection getElevatorDirection() {
@@ -190,7 +198,7 @@ public class ControlTerminalSubsystem extends Subsystem {
 	}
 
 	@Override
-	protected void initDefaultCommand() {
+	public void setDefaultCommand(Command defaultCommand) {
 
 	}
 }
