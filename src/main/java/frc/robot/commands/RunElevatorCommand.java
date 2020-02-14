@@ -9,14 +9,24 @@ import frc.robot.subsystems.ControlTerminalSubsystem;
 public class RunElevatorCommand extends Command {
 	private ControlTerminalSubsystem _elevator;
 
+	public enum Direction {
+		FORWARD, BACKWARD
+	}
 
-	public RunElevatorCommand() {
+
+	private Direction _direction;
+
+
+	public RunElevatorCommand(Direction direction) {
 		_elevator = ControlTerminalSubsystem.getInstance();
 		requires(_elevator);
+
+		_direction = direction;
 	}
 
 	@Override
 	protected void initialize() {
+		/*
 		switch (_elevator.getElevatorDirection()) {
 			case DOWN:
 				_elevator.runElevator(ControlTerminalSubsystem.ElevatorDirection.UP);
@@ -25,11 +35,22 @@ public class RunElevatorCommand extends Command {
 				_elevator.runElevator(ControlTerminalSubsystem.ElevatorDirection.DOWN);
 				break;
 		}
+
+		 */
+		switch (_direction) {
+			case FORWARD:
+				_elevator.solenoidForward();
+				break;
+			case BACKWARD:
+				_elevator.solenoidReverse();
+				break;
+		}
 	}
 
 	@Override
 	protected void execute() {
-
+		System.out.println("Compressor Current: "+_elevator.getCompressorCurrent());
+		System.out.println("Pressure Switch value:"+_elevator.isCompressorPressureSwitch());
 	}
 
 	@Override
@@ -40,6 +61,8 @@ public class RunElevatorCommand extends Command {
 	@Override
 	protected void end() {
 		_elevator.stopElevator();
+		_elevator.solenoidOff();
+		_elevator.compressorOff();
 	}
 
 	@Override

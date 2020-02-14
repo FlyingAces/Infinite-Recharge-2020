@@ -25,11 +25,11 @@ public class ControllerSubsystem extends Subsystem {
         JoystickButton bButton = new JoystickButton(_joystick, RobotMap.Controller.B_BUTTON.getChannel());
         bButton.whenPressed(new TurnControlTerminal(0.5, 3));
 
-//        JoystickButton yButton = new JoystickButton(_joystick, RobotMap.Controller.Y_BUTTON.getChannel());
-//        yButton.whenPressed(new RunElevatorCommand(1.0));
+        JoystickButton yButton = new JoystickButton(_joystick, RobotMap.Controller.Y_BUTTON.getChannel());
+        yButton.whenPressed(new RunElevatorCommand(RunElevatorCommand.Direction.BACKWARD));
 
         JoystickButton aButton = new JoystickButton(_joystick, RobotMap.Controller.A_BUTTON.getChannel());
-        aButton.whenPressed(new RunElevatorCommand());
+        aButton.whenPressed(new RunElevatorCommand(RunElevatorCommand.Direction.FORWARD));
     }
 
     public void initDefaultCommand() {

@@ -12,6 +12,8 @@ import com.revrobotics.ColorSensorV3;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 import frc.robot.config.RobotMap;
 
@@ -25,6 +27,11 @@ public class ControlTerminalSubsystem extends Subsystem {
 	private final ColorSensorV3 _colorSensor = new ColorSensorV3(_i2cPort);
 	private final ColorMatch _colorMatcher = new ColorMatch();
 	private ElevatorDirection _elevatorDirection;
+
+
+	private Compressor _compressor;
+	private DoubleSolenoid _solenoidDouble1;
+	private DoubleSolenoid _solenoidDouble2;
 
 	public enum ElevatorDirection {
 		UP(1),
@@ -44,6 +51,12 @@ public class ControlTerminalSubsystem extends Subsystem {
 	public ControlTerminalSubsystem() {
 		WPI_TalonSRX controlTerminal = new WPI_TalonSRX(RobotMap.Talon.CONTROL_TERMINAL.getChannel());
 		WPI_TalonSRX elevator = new WPI_TalonSRX(RobotMap.Talon.CONTROL_TERMINAL_ELEVATOR.getChannel());
+
+		_compressor = new Compressor(0);
+		_compressor.setClosedLoopControl(true);
+
+		_solenoidDouble1 = new DoubleSolenoid(0, 2);
+		_solenoidDouble2 = new DoubleSolenoid(1, 3);
 
 		_controlTerminal = controlTerminal;
 		_elevator = elevator;
@@ -80,6 +93,38 @@ public class ControlTerminalSubsystem extends Subsystem {
 		_colorMatcher.addColorMatch(RobotMap.YELLOW_TARGET);
 
 		_elevatorDirection = ElevatorDirection.DOWN;
+	}
+
+	public boolean isCompressorEnable(){
+		return _compressor.enabled();
+	}
+
+	public boolean isCompressorPressureSwitch(){
+		return _compressor.getPressureSwitchValue();
+	}
+
+	public double getCompressorCurrent(){
+		return _compressor.getCompressorCurrent();
+	}
+
+	public void compressorOff(){
+		_compressor.setClosedLoopControl(false);
+	}
+
+	public void compressorOn(){
+		_compressor.setClosedLoopControl(true);
+	}
+	public void solenoidOff(){
+		_solenoidDouble1.set(DoubleSolenoid.Value.kOff);
+		//_solenoidDouble2.set(DoubleSolenoid.Value.kOff);
+	}
+	public void solenoidForward(){
+		_solenoidDouble1.set(DoubleSolenoid.Value.kForward);
+		//_solenoidDouble2.set(DoubleSolenoid.Value.kReverse);
+	}
+	public void solenoidReverse(){
+		_solenoidDouble1.set(DoubleSolenoid.Value.kReverse);
+		//_solenoidDouble2.set(DoubleSolenoid.Value.kForward);
 	}
 
 	public Color getDetectedColor() {
