@@ -11,12 +11,32 @@ public class PneumaticSubsystem extends Subsystem {
     private DoubleSolenoid _elevatorSolenoid;
     private DoubleSolenoid _aimSolenoid;
 
+    public enum SolenoidState {
+        OFF(DoubleSolenoid.Value.kOff),
+        FORWARD(DoubleSolenoid.Value.kForward),
+        REVERSE(DoubleSolenoid.Value.kReverse);
+
+        SolenoidState(DoubleSolenoid.Value state) {
+            _state = state;
+        }
+
+        private DoubleSolenoid.Value _state;
+
+        public DoubleSolenoid.Value getState() {
+            return _state;
+        }
+    }
+
+    private SolenoidState _state;
+
     private PneumaticSubsystem(){
         _compressor = new Compressor(0);
         _compressor.setClosedLoopControl(true);
 
         _elevatorSolenoid = new DoubleSolenoid(0, 2);
         _aimSolenoid = new DoubleSolenoid(1, 3);
+
+        _state = SolenoidState.OFF;
     }
 
 
@@ -51,20 +71,45 @@ public class PneumaticSubsystem extends Subsystem {
         _elevatorSolenoid.set(DoubleSolenoid.Value.kOff);
         _aimSolenoid.set(DoubleSolenoid.Value.kOff);
     }
-    public void elevatorForward(){
-        _elevatorSolenoid.set(DoubleSolenoid.Value.kForward);
+
+
+    public SolenoidState getSolenoidState(){
+         return _state;
+    }
+    public void runElevator(SolenoidState state){
+        _state = state;
+        _elevatorSolenoid.set(_state.getState());
     }
 
-    public void aimForward(){
-        _aimSolenoid.set(DoubleSolenoid.Value.kForward);
+    public boolean isElevatorFinished(){
+        switch (_state){
+            case OFF:
+                return true;
+            case FORWARD:
+                return _elevatorSolenoid.get() == DoubleSolenoid.Value.kForward;
+            case REVERSE:
+                return _elevatorSolenoid.get() == DoubleSolenoid.Value.kReverse;
+            default:
+                return true;
+        }
+    }
+    public void runAimer(SolenoidState state){
+        _state = state;
+        _aimSolenoid.set(_state.getState());
     }
 
-    public void elevatorReverse(){
-        _elevatorSolenoid.set(DoubleSolenoid.Value.kReverse);
-    }
+    public boolean isAimerFinished(){
+        switch (_state){
+            case OFF:
+                return true;
+            case FORWARD:
+                return _aimSolenoid.get() == DoubleSolenoid.Value.kForward;
+            case REVERSE:
+                return _aimSolenoid.get() == DoubleSolenoid.Value.kReverse;
+            default:
+                return true;
+        }
 
-    public void aimReverse(){
-        _aimSolenoid.set(DoubleSolenoid.Value.kReverse);
     }
 
     @Override
