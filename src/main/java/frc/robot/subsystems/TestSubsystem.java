@@ -23,7 +23,7 @@ public class TestSubsystem extends PIDSubsystem {
 	public TestSubsystem() {
 		super(new PIDController(20.0, 0.1, 0.0));
 
-		WPI_TalonFX testMotor = new WPI_TalonFX(RobotMap.Talon.TEST.getChannel());
+		WPI_TalonFX testMotor = new WPI_TalonFX(RobotMap.Talon.TEST_MOTOR.getChannel());
 
 		_testMotor = testMotor;
 

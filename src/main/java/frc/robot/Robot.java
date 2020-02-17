@@ -19,6 +19,8 @@ import frc.robot.subsystems.ControllerSubsystem;
 
 public class Robot extends TimedRobot {
     private Command _teleopCommand;
+    private Command _autonomousCommand;
+    private Command _testCommand;
 
     @Override
     public void robotInit() {
@@ -27,11 +29,12 @@ public class Robot extends TimedRobot {
     }
 
     @Override
-    public void robotPeriodic() {
+    public void autonomousInit() {
     }
 
     @Override
-    public void autonomousInit() {
+    public void teleopInit() {
+        _teleopCommand.schedule();
     }
 
     @Override
@@ -41,8 +44,7 @@ public class Robot extends TimedRobot {
     }
 
     @Override
-    public void teleopInit() {
-        _teleopCommand.schedule();
+    public void robotPeriodic() {
     }
 
     @Override

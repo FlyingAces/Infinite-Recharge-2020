@@ -1,15 +1,22 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.command.Subsystem;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
-public class PneumaticSubsystem extends Subsystem {
+import frc.robot.config.RobotMap;
+
+
+public class PneumaticSubsystem implements Subsystem {
     private static PneumaticSubsystem _instance;
 
     private Compressor _compressor;
     private DoubleSolenoid _elevatorSolenoid;
     private DoubleSolenoid _aimSolenoid;
+    private SolenoidState _state;
 
     public enum SolenoidState {
         OFF(DoubleSolenoid.Value.kOff),
@@ -27,14 +34,12 @@ public class PneumaticSubsystem extends Subsystem {
         }
     }
 
-    private SolenoidState _state;
-
     private PneumaticSubsystem(){
-        _compressor = new Compressor(0);
+        _compressor = new Compressor(RobotMap.Pneumatics.COMPRESSOR_MODULE.getChannel());
         _compressor.setClosedLoopControl(true);
 
-        _elevatorSolenoid = new DoubleSolenoid(0, 2);
-        _aimSolenoid = new DoubleSolenoid(1, 3);
+        _elevatorSolenoid = new DoubleSolenoid(RobotMap.Pneumatics.ELEVATOR_SOLENOID_FWD_CHANNEL.getChannel(), RobotMap.Pneumatics.ELEVATOR_SOLENOID_REV_CHANNEL.getChannel());
+        _aimSolenoid = new DoubleSolenoid(RobotMap.Pneumatics.INTAKE_SOLENOID_FWD_CHANNEL.getChannel(), RobotMap.Pneumatics.INTAKE_SOLENOID_REV_CHANNEL.getChannel());
 
         _state = SolenoidState.OFF;
     }
@@ -45,14 +50,6 @@ public class PneumaticSubsystem extends Subsystem {
             _instance = new PneumaticSubsystem();
 
         return _instance;
-    }
-
-    public boolean isCompressorEnable(){
-        return _compressor.enabled();
-    }
-
-    public boolean isCompressorPressureSwitch(){
-        return _compressor.getPressureSwitchValue();
     }
 
     public double getCompressorCurrent(){
@@ -68,14 +65,14 @@ public class PneumaticSubsystem extends Subsystem {
     }
 
     public void solenoidOff(){
-        _elevatorSolenoid.set(DoubleSolenoid.Value.kOff);
-        _aimSolenoid.set(DoubleSolenoid.Value.kOff);
+        _elevatorSolenoid.set(SolenoidState.OFF.getState());
+        _aimSolenoid.set(SolenoidState.OFF.getState());
     }
-
 
     public SolenoidState getSolenoidState(){
          return _state;
     }
+
     public void runElevator(SolenoidState state){
         _state = state;
         _elevatorSolenoid.set(_state.getState());
@@ -93,6 +90,7 @@ public class PneumaticSubsystem extends Subsystem {
                 return true;
         }
     }
+
     public void runAimer(SolenoidState state){
         _state = state;
         _aimSolenoid.set(_state.getState());
@@ -103,17 +101,16 @@ public class PneumaticSubsystem extends Subsystem {
             case OFF:
                 return true;
             case FORWARD:
-                return _aimSolenoid.get() == DoubleSolenoid.Value.kForward;
+                return _aimSolenoid.get() == SolenoidState.FORWARD.getState();
             case REVERSE:
-                return _aimSolenoid.get() == DoubleSolenoid.Value.kReverse;
+                return _aimSolenoid.get() == SolenoidState.REVERSE.getState();
             default:
                 return true;
         }
-
     }
 
     @Override
-    protected void initDefaultCommand(){}
+    public void setDefaultCommand(Command defaultCommand) {
+
+    }
 }
-
-

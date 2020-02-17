@@ -2,7 +2,9 @@ package frc.robot.config;
 
 
 import com.revrobotics.ColorMatch;
+
 import edu.wpi.first.wpilibj.util.Color;
+import frc.robot.subsystems.PneumaticSubsystem;
 
 
 public class RobotMap {
@@ -30,11 +32,11 @@ public class RobotMap {
     public enum Talon {
         LEFT_MASTER(0),
         LEFT_SLAVE(0),
-        
         RIGHT_MASTER(0),
         RIGHT_SLAVE(0),
-        CONTROL_TERMINAL(5),
-        CONTROL_TERMINAL_ELEVATOR(4);
+        CONTROL_TERMINAL(0),
+        CONTROL_TERMINAL_ELEVATOR(0),
+        TEST_MOTOR(0);
 
         private int _channel;
 
@@ -47,24 +49,16 @@ public class RobotMap {
         }
     }
 
-    public enum Controller {
-        JOYSTICK_PORT(0),
-        AXIS_TRIGGER_LT(2),
-        AXIS_TRIGGER_RT(3),
-        TRIGGER_LB(5),
-        TRIGGER_RB(6),
-        LEFT_AXIS_X(0),
-        LEFT_AXIS_Y(1),
-        RIGHT_AXIS_X(4),
-        RIGHT_AXIS_Y(5),
-        A_BUTTON(1),
-        B_BUTTON(2),
-        X_BUTTON(3),
-        Y_BUTTON(4);
+    public enum Pneumatics {
+        COMPRESSOR_MODULE(0),
+        ELEVATOR_SOLENOID_FWD_CHANNEL(0),
+        ELEVATOR_SOLENOID_REV_CHANNEL(2),
+        INTAKE_SOLENOID_FWD_CHANNEL(1),
+        INTAKE_SOLENOID_REV_CHANNEL(3);
 
         private int _channel;
 
-        Controller(int channel) {
+        Pneumatics(int channel) {
             _channel = channel;
         }
 
@@ -74,9 +68,9 @@ public class RobotMap {
     }
 
     public enum RobotMeasurement {
-        ROBOT_WIDTH(0.0),
-        ROBOT_LENGTH(0.0),
-        ROBOT_HEIGHT(0.0),
+        ROBOT_WIDTH(28.0),
+        ROBOT_LENGTH(32.0),
+        ROBOT_HEIGHT(27.25),
         DRIVETRAIN_WHEEL_DIAMETER(0.0),
         CONTROL_TERMINAL_WHEEL_DIAMETER(4.0);
 

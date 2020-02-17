@@ -1,72 +1,41 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.command.Command;
 
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj2.command.Command;
+
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.subsystems.PneumaticSubsystem;
 
-
-import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
-
-public class TestCommand extends Command {
-
-	private PneumaticSubsystem _pneumatic;
-
-	public enum Direction{
-		UP,DOWN
-	}
-
-	private Direction _direction;
+import java.util.HashSet;
+import java.util.Set;
 
 
-	public TestCommand() {
-		_pneumatic = PneumaticSubsystem.getInstance();
-		requires(_pneumatic);
+public class TestCommand implements Command {
 
-//		_direction = direction;
+	@Override
+	public void initialize() {
+
 	}
 
 	@Override
-	protected void initialize() {
-		switch (_pneumatic.getSolenoidState()){
-			case FORWARD:
-				_pneumatic.runElevator(PneumaticSubsystem.SolenoidState.REVERSE);
-				_pneumatic.runAimer(PneumaticSubsystem.SolenoidState.REVERSE);
-				break;
-			case REVERSE:
-				_pneumatic.runElevator(PneumaticSubsystem.SolenoidState.FORWARD);
-				_pneumatic.runAimer(PneumaticSubsystem.SolenoidState.FORWARD);
-				break;
-			case OFF:
-				_pneumatic.runElevator(PneumaticSubsystem.SolenoidState.FORWARD);
-				_pneumatic.runAimer(PneumaticSubsystem.SolenoidState.FORWARD);
-				break;
-		}
+	public void execute() {
+
 	}
 
 	@Override
-	protected void execute() {
-//		System.out.println("Compressor Current: "+_pneumatic.getCompressorCurrent());
-//		System.out.println("Pressure Switch value:"+_pneumatic.isCompressorPressureSwitch());
-
-		if (_pneumatic.getCompressorCurrent() == 0){
-			_pneumatic.compressorOn();
-		}
+	public boolean isFinished() {
+		return false;
 	}
 
 	@Override
-	protected boolean isFinished() {
-
-		return _pneumatic.isElevatorFinished();
-	}
-
-	@Override
-	protected void end() {
-		_pneumatic.solenoidOff();
-	}
+	public Set<Subsystem> getRequirements() {
+		Set<Subsystem> requirements = new HashSet<>();
+		//requirements.add(subsystem);
+		return requirements;	}
 
 	@Override
-	protected void interrupted() {
-		end();
+	public void end(boolean interrupted) {
 	}
+
 }

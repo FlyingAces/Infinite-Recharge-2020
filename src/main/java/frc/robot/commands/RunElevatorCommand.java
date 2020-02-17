@@ -1,72 +1,59 @@
 package frc.robot.commands;
 
 
-import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 
-import frc.robot.subsystems.ControlTerminalSubsystem;
+import frc.robot.subsystems.PneumaticSubsystem;
 
-
-public class RunElevatorCommand extends Command {
-	private ControlTerminalSubsystem _elevator;
-
-	public enum Direction {
-		FORWARD, BACKWARD
-	}
+import java.util.HashSet;
+import java.util.Set;
 
 
-	private Direction _direction;
+public class RunElevatorCommand implements Command {
+	private PneumaticSubsystem _elevator;
 
-
-	public RunElevatorCommand(Direction direction) {
-		_elevator = ControlTerminalSubsystem.getInstance();
-		requires(_elevator);
-
-		_direction = direction;
+	public RunElevatorCommand() {
+		_elevator = PneumaticSubsystem.getInstance();
 	}
 
 	@Override
-	protected void initialize() {
-		/*
-		switch (_elevator.getElevatorDirection()) {
-			case DOWN:
-				_elevator.runElevator(ControlTerminalSubsystem.ElevatorDirection.UP);
-				break;
-			case UP:
-				_elevator.runElevator(ControlTerminalSubsystem.ElevatorDirection.DOWN);
-				break;
-		}
-
-		 */
-		switch (_direction) {
+	public void initialize() {
+		switch (_elevator.getSolenoidState()){
 			case FORWARD:
-				_elevator.solenoidForward();
+				_elevator.runElevator(PneumaticSubsystem.SolenoidState.REVERSE);
 				break;
-			case BACKWARD:
-				_elevator.solenoidReverse();
+			case REVERSE:
+				_elevator.runElevator(PneumaticSubsystem.SolenoidState.FORWARD);
+				break;
+			case OFF:
+				_elevator.runElevator(PneumaticSubsystem.SolenoidState.FORWARD);
 				break;
 		}
 	}
 
 	@Override
-	protected void execute() {
-		System.out.println("Compressor Current: "+_elevator.getCompressorCurrent());
-		System.out.println("Pressure Switch value:"+_elevator.isCompressorPressureSwitch());
+	public void execute() {
+		if (_elevator.getCompressorCurrent() == 0){
+			_elevator.compressorOn();
+		}
 	}
 
 	@Override
-	protected boolean isFinished() {
+	public boolean isFinished() {
 		return _elevator.isElevatorFinished();
 	}
 
 	@Override
-	protected void end() {
-		_elevator.stopElevator();
-		_elevator.solenoidOff();
-		_elevator.compressorOff();
+	public Set<Subsystem> getRequirements() {
+		Set<Subsystem> requirements = new HashSet<>();
+		requirements.add(_elevator);
+		return requirements;
 	}
 
 	@Override
-	protected void interrupted() {
-		end();
+	public void end(boolean interrupted) {
+		_elevator.solenoidOff();
+		_elevator.compressorOff();
 	}
 }
