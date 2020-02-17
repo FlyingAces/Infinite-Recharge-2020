@@ -1,54 +1,72 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.command.Command;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Subsystem;
-
-import frc.robot.subsystems.TestSubsystem;
-
-import java.util.HashSet;
-import java.util.Set;
+import frc.robot.subsystems.PneumaticSubsystem;
 
 
-public class TestCommand implements Command {
-	private TestSubsystem _testSubsystem;
-	private double _speed;
-	private int _count;
+import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
 
-	public TestCommand(double speed) {
-		_testSubsystem = TestSubsystem.getInstance();
+public class TestCommand extends Command {
 
-		_speed = speed;
+	private PneumaticSubsystem _pneumatic;
+
+	public enum Direction{
+		UP,DOWN
+	}
+
+	private Direction _direction;
+
+
+	public TestCommand() {
+		_pneumatic = PneumaticSubsystem.getInstance();
+		requires(_pneumatic);
+
+//		_direction = direction;
 	}
 
 	@Override
-	public void initialize() {
-		_testSubsystem.zeroPosition();
-		_testSubsystem.setSetpoint(500000); // Encoder ticks
-		_testSubsystem.enable();
-		execute();
+	protected void initialize() {
+		switch (_pneumatic.getSolenoidState()){
+			case FORWARD:
+				_pneumatic.runElevator(PneumaticSubsystem.SolenoidState.REVERSE);
+				_pneumatic.runAimer(PneumaticSubsystem.SolenoidState.REVERSE);
+				break;
+			case REVERSE:
+				_pneumatic.runElevator(PneumaticSubsystem.SolenoidState.FORWARD);
+				_pneumatic.runAimer(PneumaticSubsystem.SolenoidState.FORWARD);
+				break;
+			case OFF:
+				_pneumatic.runElevator(PneumaticSubsystem.SolenoidState.FORWARD);
+				_pneumatic.runAimer(PneumaticSubsystem.SolenoidState.FORWARD);
+				break;
+		}
 	}
 
 	@Override
-	public void execute() {
-		System.out.println("Position: " + _testSubsystem.getMotorPosition());
+	protected void execute() {
+//		System.out.println("Compressor Current: "+_pneumatic.getCompressorCurrent());
+//		System.out.println("Pressure Switch value:"+_pneumatic.isCompressorPressureSwitch());
+
+		if (_pneumatic.getCompressorCurrent() == 0){
+			_pneumatic.compressorOn();
+		}
 	}
 
 	@Override
-	public boolean isFinished() {
-		return false;
+	protected boolean isFinished() {
+
+		return _pneumatic.isElevatorFinished();
 	}
 
 	@Override
-	public Set<Subsystem> getRequirements() {
-		Set<Subsystem> requirements = new HashSet<>();
-		requirements.add(_testSubsystem);
-		return requirements;
+	protected void end() {
+		_pneumatic.solenoidOff();
 	}
 
 	@Override
-	public void end(boolean interrupted) {
-		_testSubsystem.runMotor(0.0);
-		_testSubsystem.zeroPosition();
+	protected void interrupted() {
+		end();
 	}
 }
