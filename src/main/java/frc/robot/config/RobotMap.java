@@ -8,7 +8,7 @@ public class RobotMap {
         LEFT_SLAVE(4),
         RIGHT_MASTER(1),
         RIGHT_SLAVE(2),
-        TEST(0);
+        TEST(5);
 
         private int _channel;
 
@@ -47,16 +47,16 @@ public class RobotMap {
         }
     }
 
-    public static enum Measurement {
+    public enum Measurement {
         //width of inside of track
         ROBOT_WIDTH(0.0),
         ROBOT_LENGTH(0.0),
         ROBOT_HEIGHT(0.0),
-        WHEEL_DIAMETER(0.0);
+        WHEEL_DIAMETER(6.0);
 
         private double _inches;
 
-        private Measurement(double inches) {
+        Measurement(double inches) {
             _inches = inches;
         }
 
