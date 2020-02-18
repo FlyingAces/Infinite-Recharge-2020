@@ -22,7 +22,7 @@ import frc.robot.config.RobotMap;
 public class ControlTerminalSubsystem implements Subsystem {
 	private static ControlTerminalSubsystem _instance;
 	private TalonSRX _controlTerminal;
-	private TalonSRX _elevator;
+
 
 	private final I2C.Port _i2cPort = I2C.Port.kOnboard;
 	private final ColorSensorV3 _colorSensor = new ColorSensorV3(_i2cPort);
@@ -30,10 +30,8 @@ public class ControlTerminalSubsystem implements Subsystem {
 
 	public ControlTerminalSubsystem() {
 		WPI_TalonSRX controlTerminal = new WPI_TalonSRX(RobotMap.Talon.CONTROL_TERMINAL.getChannel());
-		WPI_TalonSRX elevator = new WPI_TalonSRX(RobotMap.Talon.CONTROL_TERMINAL_ELEVATOR.getChannel());
 
 		_controlTerminal = controlTerminal;
-		_elevator = elevator;
 
 		_controlTerminal.configFactoryDefault();
 		_controlTerminal.setNeutralMode(NeutralMode.Brake);
@@ -50,6 +48,9 @@ public class ControlTerminalSubsystem implements Subsystem {
 		_colorMatcher.addColorMatch(RobotMap.GREEN_TARGET);
 		_colorMatcher.addColorMatch(RobotMap.RED_TARGET);
 		_colorMatcher.addColorMatch(RobotMap.YELLOW_TARGET);
+
+		_controlTerminal.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, RobotMap.K_TIMEOUT_MS);
+		_controlTerminal.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, RobotMap.K_TIMEOUT_MS);
 	}
 
 	public Color getDetectedColor() {
@@ -81,7 +82,7 @@ public class ControlTerminalSubsystem implements Subsystem {
 	}
 
 	public void runControlTerminal(double speed) {
-		if (_elevator.isRevLimitSwitchClosed() == 1) {
+		if (_controlTerminal.isRevLimitSwitchClosed() == 1) {
 			_controlTerminal.set(ControlMode.PercentOutput, 0.0);
 		} else {
 			_controlTerminal.set(ControlMode.PercentOutput, speed);

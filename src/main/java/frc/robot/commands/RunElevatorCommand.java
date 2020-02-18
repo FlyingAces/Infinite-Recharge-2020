@@ -34,7 +34,7 @@ public class RunElevatorCommand implements Command {
 
 	@Override
 	public void execute() {
-		if (_elevator.getCompressorCurrent() == 0){
+		if (_elevator.isCompressorPressureSwitch()){
 			_elevator.compressorOn();
 		}
 	}

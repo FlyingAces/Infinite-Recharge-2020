@@ -6,7 +6,9 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
+import frc.robot.commands.RunControlTerminalUntilColor;
 import frc.robot.commands.RunElevatorCommand;
+import frc.robot.commands.TestCommand;
 import frc.robot.commands.TurnControlTerminal;
 import frc.robot.config.ControllerMap;
 
@@ -19,7 +21,7 @@ public class ControllerSubsystem implements Subsystem {
         _joystick = new Joystick(ControllerMap.JOYSTICK_PORT);
 
         JoystickButton xButton = new JoystickButton(_joystick, ControllerMap.X_BUTTON);
-        xButton.whenPressed(new TurnControlTerminal(1.0, 3));
+        xButton.whenPressed(new TestCommand(1.0));
 
         JoystickButton aButton = new JoystickButton(_joystick, ControllerMap.A_BUTTON);
         aButton.whenPressed(new RunElevatorCommand());

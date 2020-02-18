@@ -4,6 +4,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
+import frc.robot.config.ControllerMap;
 import frc.robot.config.RobotMap;
 import frc.robot.subsystems.ControllerSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -28,9 +29,9 @@ public class DriveRobot implements Command {
 
     @Override
     public void execute() {
-        double driveSpeed = _controller.getJoystick().getRawAxis(RobotMap.Controller.AXIS_TRIGGER_RT.getChannel()) -
-                _controller.getJoystick().getRawAxis(RobotMap.Controller.AXIS_TRIGGER_LT.getChannel());
-        double driveAngle = _controller.getJoystick().getRawAxis(RobotMap.Controller.LEFT_AXIS_X.getChannel());
+        double driveSpeed = _controller.getJoystick().getRawAxis(ControllerMap.AXIS_TRIGGER_RT) -
+                _controller.getJoystick().getRawAxis(ControllerMap.AXIS_TRIGGER_LT);
+        double driveAngle = _controller.getJoystick().getRawAxis(ControllerMap.LEFT_AXIS_X);
 
         _drive.arcadeDrive(driveSpeed, driveAngle);
     }

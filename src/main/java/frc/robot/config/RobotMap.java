@@ -34,8 +34,7 @@ public class RobotMap {
         LEFT_SLAVE(0),
         RIGHT_MASTER(0),
         RIGHT_SLAVE(0),
-        CONTROL_TERMINAL(0),
-        CONTROL_TERMINAL_ELEVATOR(0),
+        CONTROL_TERMINAL(7),
         TEST_MOTOR(0);
 
         private int _channel;
