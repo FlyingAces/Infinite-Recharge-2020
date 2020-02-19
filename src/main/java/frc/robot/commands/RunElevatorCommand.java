@@ -23,20 +23,22 @@ public class RunElevatorCommand implements Command {
 			case FORWARD:
 				_elevator.runElevator(PneumaticSubsystem.SolenoidState.REVERSE);
 				break;
-			case REVERSE:
-				_elevator.runElevator(PneumaticSubsystem.SolenoidState.FORWARD);
-				break;
-			case OFF:
+			default:
 				_elevator.runElevator(PneumaticSubsystem.SolenoidState.FORWARD);
 				break;
 		}
+
 	}
 
 	@Override
-	public void execute() {
-		if (_elevator.isCompressorPressureSwitch()){
+	public void execute()
+	{
+		if(!_elevator.isCompressorPressureSwitch())
+		{
 			_elevator.compressorOn();
 		}
+		System.out.println("Compressor Current: "+_elevator.getCompressorCurrent());
+		System.out.println("Pressure Switch value:"+_elevator.isCompressorPressureSwitch());
 	}
 
 	@Override
@@ -54,6 +56,5 @@ public class RunElevatorCommand implements Command {
 	@Override
 	public void end(boolean interrupted) {
 		_elevator.solenoidOff();
-		_elevator.compressorOff();
 	}
 }

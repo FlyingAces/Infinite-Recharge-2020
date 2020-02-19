@@ -15,12 +15,14 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import frc.robot.commands.DriveRobot;
 import frc.robot.subsystems.ControllerSubsystem;
+import frc.robot.subsystems.PneumaticSubsystem;
 
 
 public class Robot extends TimedRobot {
     private Command _teleopCommand;
     private Command _autonomousCommand;
     private Command _testCommand;
+    private PneumaticSubsystem _elevator;
 
     @Override
     public void robotInit() {
@@ -50,6 +52,7 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         CommandScheduler.getInstance().run();
+
     }
 
     @Override

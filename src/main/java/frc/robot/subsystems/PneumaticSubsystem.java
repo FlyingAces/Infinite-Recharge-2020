@@ -55,6 +55,9 @@ public class PneumaticSubsystem implements Subsystem {
     public boolean isCompressorPressureSwitch(){
         return _compressor.getPressureSwitchValue();
     }
+    public double getCompressorCurrent(){
+        return _compressor.getCompressorCurrent();
+    }
 
     public void compressorOff(){
         _compressor.setClosedLoopControl(false);
