@@ -14,9 +14,8 @@ public class RobotMap {
     public static final Color GREEN_TARGET = ColorMatch.makeColor(0.197, 0.561, 0.240);
     public static final Color RED_TARGET = ColorMatch.makeColor(0.561, 0.232, 0.114);
     public static final Color YELLOW_TARGET = ColorMatch.makeColor(0.361, 0.524, 0.113);
-    public static final int CAMERA_FRONT = 1;
-    public static final int CAMERA_BACK = 0;
-    //only can use 160x120, 320x240, 640x480
+
+    public static final int CAMERA_FRONT = 0;
     public static final int CAMERA_IMG_WIDTH = 320;
     public static final int CAMERA_IMG_HEIGHT = 240;
 

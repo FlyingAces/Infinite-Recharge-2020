@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import frc.robot.config.ControllerMap;
 import frc.robot.config.RobotMap;
+import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.ControllerSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
@@ -16,10 +17,12 @@ import java.util.Set;
 public class DriveRobot implements Command {
     private DrivetrainSubsystem _drive;
     private ControllerSubsystem _controller;
+    private CameraSubsystem _camera;
 
     public DriveRobot() {
         _drive = DrivetrainSubsystem.getInstance();
         _controller = ControllerSubsystem.getInstance();
+        _camera = CameraSubsystem.getInstance();
     }
 
     @Override
@@ -44,7 +47,10 @@ public class DriveRobot implements Command {
     @Override
     public Set<Subsystem> getRequirements() {
         Set<Subsystem> requirements = new HashSet<>();
+
         requirements.add(_drive);
+        requirements.add(_camera);
+
         return requirements;
     }
 
