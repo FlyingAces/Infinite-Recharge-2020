@@ -4,56 +4,45 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
-import frc.robot.subsystems.PneumaticSubsystem;
+import frc.robot.subsystems.ControlTerminalSubsystem;
 
 import java.util.HashSet;
 import java.util.Set;
 
 
 public class RunElevatorCommand implements Command {
-	private PneumaticSubsystem _elevator;
+	private ControlTerminalSubsystem _pneumatic;
 
 	public RunElevatorCommand() {
-		_elevator = PneumaticSubsystem.getInstance();
+		_pneumatic = ControlTerminalSubsystem.getInstance();
 	}
 
 	@Override
 	public void initialize() {
-		switch (_elevator.getSolenoidState()){
+		switch (_pneumatic.getSolenoidState()){
 			case FORWARD:
-				_elevator.runElevator(PneumaticSubsystem.SolenoidState.REVERSE);
+				_pneumatic.runElevator(ControlTerminalSubsystem.SolenoidState.REVERSE);
 				break;
-			case REVERSE:
-				_elevator.runElevator(PneumaticSubsystem.SolenoidState.FORWARD);
-				break;
-			case OFF:
-				_elevator.runElevator(PneumaticSubsystem.SolenoidState.FORWARD);
+			default:
+				_pneumatic.runElevator(ControlTerminalSubsystem.SolenoidState.FORWARD);
 				break;
 		}
 	}
 
 	@Override
 	public void execute() {
-		if (_elevator.isCompressorPressureSwitch()){
-			_elevator.compressorOn();
-		}
-	}
 
-	@Override
-	public boolean isFinished() {
-		return _elevator.isElevatorFinished();
 	}
 
 	@Override
 	public Set<Subsystem> getRequirements() {
 		Set<Subsystem> requirements = new HashSet<>();
-		requirements.add(_elevator);
+		requirements.add(_pneumatic);
 		return requirements;
 	}
 
 	@Override
 	public void end(boolean interrupted) {
-		_elevator.solenoidOff();
-		_elevator.compressorOff();
+		_pneumatic.solenoidOff();
 	}
 }

@@ -6,10 +6,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
-import frc.robot.commands.RunControlTerminalUntilColor;
-import frc.robot.commands.RunElevatorCommand;
 import frc.robot.commands.TestCommand;
-import frc.robot.commands.TurnControlTerminal;
 import frc.robot.config.ControllerMap;
 
 

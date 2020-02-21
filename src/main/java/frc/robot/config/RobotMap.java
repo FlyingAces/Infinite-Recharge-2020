@@ -4,7 +4,6 @@ package frc.robot.config;
 import com.revrobotics.ColorMatch;
 
 import edu.wpi.first.wpilibj.util.Color;
-import frc.robot.subsystems.PneumaticSubsystem;
 
 
 public class RobotMap {

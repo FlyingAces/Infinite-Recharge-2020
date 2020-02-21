@@ -13,7 +13,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 
-import frc.robot.commands.DriveRobot;
+import frc.robot.commands.CommandWithController;
+import frc.robot.commands.DriveRobotAutonomousCommand;
+import frc.robot.commands.TestCommand;
 import frc.robot.subsystems.ControllerSubsystem;
 
 
@@ -24,12 +26,21 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit() {
-        _teleopCommand = new DriveRobot();
+        _teleopCommand = new CommandWithController();
+        _autonomousCommand = new DriveRobotAutonomousCommand();
+        _testCommand = new TestCommand(0);
+
         ControllerSubsystem.getInstance();
     }
 
     @Override
+    public void testInit() {
+        _testCommand.schedule();
+    }
+
+    @Override
     public void autonomousInit() {
+        _autonomousCommand.schedule();
     }
 
     @Override

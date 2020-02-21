@@ -5,19 +5,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import frc.robot.config.RobotMap;
-import frc.robot.subsystems.ControlTerminalSubsystem;
 
 import java.util.HashSet;
 import java.util.Set;
 
 
-public class TurnControlTerminal implements Command {
+public class TurnControlTerminalCommand implements Command {
 	private ControlTerminalSubsystem _controlTerminal;
 
 	private double _speed;
 	private int _rotations;
 
-	public TurnControlTerminal(double speed, int rotations) {
+	public TurnControlTerminalCommand(double speed, int rotations) {
 		_controlTerminal = ControlTerminalSubsystem.getInstance();
 
 		_speed = speed;
