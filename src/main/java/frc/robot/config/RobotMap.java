@@ -29,11 +29,11 @@ public class RobotMap {
     }
 
     public enum Talon {
-        LEFT_MASTER(0),
-        LEFT_SLAVE(0),
-        RIGHT_MASTER(0),
-        RIGHT_SLAVE(0),
-        CONTROL_TERMINAL(7),
+        LEFT_MASTER(3),
+        LEFT_SLAVE(4),
+        RIGHT_MASTER(1),
+        RIGHT_SLAVE(2),
+        CONTROL_TERMINAL(5),
         TEST_MOTOR(0);
 
         private int _channel;
@@ -49,10 +49,10 @@ public class RobotMap {
 
     public enum Pneumatics {
         COMPRESSOR_MODULE(0),
-        ELEVATOR_SOLENOID_FWD_CHANNEL(0),
-        ELEVATOR_SOLENOID_REV_CHANNEL(2),
-        INTAKE_SOLENOID_FWD_CHANNEL(1),
-        INTAKE_SOLENOID_REV_CHANNEL(3);
+        ELEVATOR_SOLENOID_FWD_CHANNEL(2),
+        ELEVATOR_SOLENOID_REV_CHANNEL(3),
+        INTAKE_SOLENOID_FWD_CHANNEL(0),
+        INTAKE_SOLENOID_REV_CHANNEL(1);
 
         private int _channel;
 
@@ -67,9 +67,11 @@ public class RobotMap {
 
     public enum RobotMeasurement {
         ROBOT_WIDTH(28.0),
+        ROBOT_LENGTH_FROM_WHEEL_CENTER(23.0),
+        ROBOT_WIDTH_FROM_WHEEL_CENTER(27.0),
         ROBOT_LENGTH(32.0),
         ROBOT_HEIGHT(27.25),
-        DRIVETRAIN_WHEEL_DIAMETER(0.0),
+        DRIVETRAIN_WHEEL_DIAMETER(6.0),
         CONTROL_TERMINAL_WHEEL_DIAMETER(4.0);
 
         private double _inches;

@@ -34,8 +34,8 @@ public class TurnToCommand implements Command {
 
 	@Override
 	public boolean isFinished() {
-		//return _drivetrain.isOnTarget();
-		return false;
+		return _drivetrain.isOnTarget();
+		//return false;
 	}
 
 	@Override

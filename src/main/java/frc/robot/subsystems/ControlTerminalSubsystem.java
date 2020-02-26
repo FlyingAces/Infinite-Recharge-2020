@@ -1,6 +1,20 @@
 package frc.robot.subsystems;
 
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+
+
+import com.revrobotics.ColorMatch;
+import com.revrobotics.ColorMatchResult;
+import edu.wpi.first.wpilibj.util.Color;
+import com.revrobotics.ColorSensorV3;
+import edu.wpi.first.wpilibj.I2C;
+
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
@@ -8,6 +22,8 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 import frc.robot.config.RobotMap;
+
+import java.awt.*;
 
 
 public class ControlTerminalSubsystem implements Subsystem {
@@ -17,6 +33,13 @@ public class ControlTerminalSubsystem implements Subsystem {
     private DoubleSolenoid _elevatorSolenoid;
     private DoubleSolenoid _aimSolenoid;
     private SolenoidState _state;
+
+    private TalonSRX _controlTerminal;
+
+    private final I2C.Port _i2cPort = I2C.Port.kOnboard;
+    private final ColorSensorV3 _colorSensor = new ColorSensorV3(_i2cPort);
+    private final ColorMatch _colorMatcher = new ColorMatch();
+
 
     public enum SolenoidState {
         OFF(DoubleSolenoid.Value.kOff),
@@ -35,6 +58,8 @@ public class ControlTerminalSubsystem implements Subsystem {
     }
 
     private ControlTerminalSubsystem(){
+        WPI_TalonSRX controlTerminal = new WPI_TalonSRX(RobotMap.Talon.CONTROL_TERMINAL.getChannel());
+
         _compressor = new Compressor(RobotMap.Pneumatics.COMPRESSOR_MODULE.getChannel());
         _compressor.setClosedLoopControl(true);
 
@@ -42,6 +67,23 @@ public class ControlTerminalSubsystem implements Subsystem {
         _aimSolenoid = new DoubleSolenoid(RobotMap.Pneumatics.INTAKE_SOLENOID_FWD_CHANNEL.getChannel(), RobotMap.Pneumatics.INTAKE_SOLENOID_REV_CHANNEL.getChannel());
 
         _state = SolenoidState.OFF;
+        _controlTerminal = controlTerminal;
+
+        _controlTerminal.configFactoryDefault();
+        _controlTerminal.setNeutralMode(NeutralMode.Brake);
+        _controlTerminal.configNominalOutputForward(0, RobotMap.K_TIMEOUT_MS);
+        _controlTerminal.configNominalOutputReverse(0, RobotMap.K_TIMEOUT_MS);
+        _controlTerminal.configPeakOutputForward(1.0, RobotMap.K_TIMEOUT_MS);
+        _controlTerminal.configPeakOutputReverse(-1.0, RobotMap.K_TIMEOUT_MS);
+        _controlTerminal.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, RobotMap.K_TIMEOUT_MS);
+        _controlTerminal.setSensorPhase(true);
+        _controlTerminal.setSelectedSensorPosition(-(_controlTerminal.getSensorCollection().getPulseWidthPosition() & 0xfff), 0, RobotMap.K_TIMEOUT_MS);
+        _controlTerminal.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
+
+        _colorMatcher.addColorMatch(RobotMap.BLUE_TARGET);
+        _colorMatcher.addColorMatch(RobotMap.GREEN_TARGET);
+        _colorMatcher.addColorMatch(RobotMap.RED_TARGET);
+        _colorMatcher.addColorMatch(RobotMap.YELLOW_TARGET);
     }
 
 
@@ -50,6 +92,39 @@ public class ControlTerminalSubsystem implements Subsystem {
             _instance = new ControlTerminalSubsystem();
 
         return _instance;
+    }
+
+    public Color getDetectedColor() {
+        return _colorSensor.getColor();
+    }
+
+    public String getColorString() {
+        ColorMatchResult match = _colorMatcher.matchClosestColor(getDetectedColor());
+
+        if (match.color == RobotMap.BLUE_TARGET) {
+            return "Blue";
+        } else if (match.color == RobotMap.RED_TARGET) {
+            return "Red";
+        } else if (match.color == RobotMap.GREEN_TARGET) {
+            return "Green";
+        } else if (match.color == RobotMap.YELLOW_TARGET) {
+            return "Yellow";
+        } else {
+            return "Unknown";
+        }
+    }
+
+    public int getEncoderPosition() {
+        return _controlTerminal.getSelectedSensorPosition(0);
+    }
+
+    public void resetEncoder() {
+        _controlTerminal.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
+    }
+
+
+    public void runControlTerminal(double speed) {
+        _controlTerminal.set(ControlMode.PercentOutput, speed);
     }
 
     public boolean isCompressorPressureSwitch(){

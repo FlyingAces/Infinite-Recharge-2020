@@ -4,6 +4,9 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
+import frc.robot.config.MotorSpeeds;
+import frc.robot.subsystems.ControlTerminalSubsystem;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,13 +14,11 @@ import java.util.Set;
 public class RunControlTerminalUntilColor implements Command {
 	private ControlTerminalSubsystem _controlTerminal;
 	private String _color;
-	private double _speed;
 
-	public RunControlTerminalUntilColor(String color, double speed) {
+	public RunControlTerminalUntilColor(String color) {
 		_controlTerminal = ControlTerminalSubsystem.getInstance();
 
 		_color = color;
-		_speed = speed;
 	}
 
 	@Override
@@ -27,7 +28,7 @@ public class RunControlTerminalUntilColor implements Command {
 
 	@Override
 	public void execute() {
-		_controlTerminal.runControlTerminal(_speed);
+		_controlTerminal.runControlTerminal(MotorSpeeds.CONTROL_TERMINAL_WHEEL_SPEED);
 	}
 
 	@Override

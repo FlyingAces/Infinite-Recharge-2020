@@ -4,7 +4,9 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
+import frc.robot.config.MotorSpeeds;
 import frc.robot.config.RobotMap;
+import frc.robot.subsystems.ControlTerminalSubsystem;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,14 +14,11 @@ import java.util.Set;
 
 public class TurnControlTerminalCommand implements Command {
 	private ControlTerminalSubsystem _controlTerminal;
-
-	private double _speed;
 	private int _rotations;
 
-	public TurnControlTerminalCommand(double speed, int rotations) {
+	public TurnControlTerminalCommand(int rotations) {
 		_controlTerminal = ControlTerminalSubsystem.getInstance();
 
-		_speed = speed;
 		_rotations = rotations;
 	}
 
@@ -30,7 +29,7 @@ public class TurnControlTerminalCommand implements Command {
 
 	@Override
 	public void execute() {
-		_controlTerminal.runControlTerminal(_speed);
+		_controlTerminal.runControlTerminal(MotorSpeeds.CONTROL_TERMINAL_WHEEL_SPEED);
 	}
 
 	@Override

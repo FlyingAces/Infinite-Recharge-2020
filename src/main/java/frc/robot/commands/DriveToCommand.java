@@ -29,13 +29,13 @@ public class DriveToCommand implements Command {
 
 	@Override
 	public void execute() {
-		System.out.println("Left: " + _drivetrain.getCurrentLeftPosition() + " || Right: " + _drivetrain.getCurrentRightPosition());
+		//System.out.println("Left: " + _drivetrain.getCurrentLeftPosition() + " || Right: " + _drivetrain.getCurrentRightPosition());
 	}
 
 	@Override
 	public boolean isFinished() {
-		//return _drivetrain.isOnTarget();
-		return false;
+		return _drivetrain.isOnTarget();
+		//return false;
 	}
 
 	@Override

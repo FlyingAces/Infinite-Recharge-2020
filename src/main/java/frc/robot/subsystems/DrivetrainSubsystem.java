@@ -19,8 +19,11 @@ import frc.robot.util.Conversions;
 
 public class DrivetrainSubsystem extends PIDSubsystem {
 	private static DrivetrainSubsystem _instance;
-	private TalonFX _leftWithEncoder;
-	private TalonFX _rightWithEncoder;
+	private TalonFX _leftMaster;
+	private TalonFX _leftSlave;
+	private TalonFX _rightMaster;
+	private TalonFX _rightSlave;
+
 	private DifferentialDrive _wheels;
 	private CommandType _type;
 	private double _pidZoneBuffer;
@@ -45,23 +48,24 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		_wheels = new DifferentialDrive(leftGroup, rightGroup);
 		_wheels.setSafetyEnabled(false);
 
-		_leftWithEncoder = leftMaster;
-		_rightWithEncoder = rightMaster;
+		_leftMaster = leftMaster;
+		_rightMaster = rightMaster;
 
 		TalonFXConfiguration config = new TalonFXConfiguration();
 		config.primaryPID.selectedFeedbackSensor = FeedbackDevice.IntegratedSensor;
 
-		_leftWithEncoder.configAllSettings(config);
-		_leftWithEncoder.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
-		_leftWithEncoder.setInverted(false);
-		_leftWithEncoder.setSelectedSensorPosition(0);
+		_leftMaster.configAllSettings(config);
+		_leftMaster.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
+		_leftMaster.setInverted(false);
+		_leftMaster.setSelectedSensorPosition(0);
 
-		_rightWithEncoder.configAllSettings(config);
-		_rightWithEncoder.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
-		_rightWithEncoder.setInverted(false);
-		_rightWithEncoder.setSelectedSensorPosition(0);
+		_rightMaster.configAllSettings(config);
+		_rightMaster.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
+		_rightMaster.setInverted(true);
+		_rightMaster.setSelectedSensorPosition(0);
 
-		_pidZoneBuffer = 0.0;
+
+		_pidZoneBuffer = 12.0; // Inches
 
 		getController().setTolerance(10.0); // Encoder ticks
 	}
@@ -96,24 +100,24 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 	}
 
 	public void zeroDrivetrain() {
-		_leftWithEncoder.setSelectedSensorPosition(0);
-		_rightWithEncoder.setSelectedSensorPosition(0);
+		_leftMaster.setSelectedSensorPosition(0);
+		_rightMaster.setSelectedSensorPosition(0);
 	}
 
 	public double getCurrentLeftPosition() {
-		return _leftWithEncoder.getSelectedSensorPosition(0);
+		return _leftMaster.getSelectedSensorPosition(0);
 	}
 
 	public double getCurrentLeftVelocity() {
-		return _leftWithEncoder.getSelectedSensorVelocity(0);
+		return _leftMaster.getSelectedSensorVelocity(0);
 	}
 
 	public double getCurrentRightPosition() {
-		return _rightWithEncoder.getSelectedSensorPosition(0);
+		return _rightMaster.getSelectedSensorPosition(0);
 	}
 
 	public double getCurrentRightVelocity() {
-		return _rightWithEncoder.getSelectedSensorVelocity(0);
+		return _rightMaster.getSelectedSensorVelocity(0);
 	}
 
 	public boolean isOnTarget() {
@@ -140,9 +144,8 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
 	@Override
 	public void setSetpoint(double dis){
-		if(_rightWithEncoder != null && _leftWithEncoder != null) {
-			_rightWithEncoder.getSensorCollection().setIntegratedSensorPosition(0, RobotMap.K_TIMEOUT_MS);
-			_leftWithEncoder.getSensorCollection().setIntegratedSensorPosition(0, RobotMap.K_TIMEOUT_MS);
+		if(_rightMaster != null && _leftMaster != null) {
+			zeroDrivetrain();
 
 			switch (_type) {
 				case STRAIGHT:
@@ -159,12 +162,14 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
 	@Override
 	protected void useOutput(double output, double setpoint) {
-		System.out.println("Output : " + output + ", setpoint : " + setpoint);
+		System.out.println("Output: " + output + " || setpoint: " + setpoint);
 
-		double percentOutput = Conversions.encoderPositionToInches(Math.abs(setpoint) - Math.abs(output) / _pidZoneBuffer);
+		double percentOutput = Conversions.encoderPositionToInches(Math.abs(output)) / _pidZoneBuffer;
+		System.out.println("Percent output: " + percentOutput);
+		System.out.println("Left vel.: " + getCurrentLeftVelocity() + " || Right vel.: " + getCurrentRightVelocity());
 
-		double leftMoveValue = percentOutput;
-		double rightMoveValue = percentOutput;
+		double leftMoveValue = (percentOutput > 1)? 1.0 : percentOutput;
+		double rightMoveValue = (percentOutput > 1)? 1.0 : percentOutput;
 
 		double rightSpeed = Math.abs(getCurrentRightVelocity());
 		double leftSpeed = Math.abs(getCurrentLeftVelocity());
@@ -173,6 +178,13 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 			rightMoveValue *= leftSpeed / rightSpeed;
 		else if(leftSpeed > rightSpeed)
 			leftMoveValue *= rightSpeed / leftSpeed;
+
+		if (output < 0) {
+			leftMoveValue *= -1;
+			rightMoveValue *= -1;
+		}
+		System.out.println("Left: " + leftMoveValue + " || Right: " + rightMoveValue);
+
 
 		switch (_type) {
 			case STRAIGHT:
@@ -186,7 +198,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
 	@Override
 	protected double getMeasurement() {
-		System.out.println("Getting measurement");
+		//System.out.println("Getting measurement");
 
 		double setpoint = getController().getSetpoint();
 

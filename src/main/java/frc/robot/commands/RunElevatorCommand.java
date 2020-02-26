@@ -31,7 +31,14 @@ public class RunElevatorCommand implements Command {
 
 	@Override
 	public void execute() {
+		if (_pneumatic.isCompressorPressureSwitch()){
+			_pneumatic.compressorOn();
+		}
+	}
 
+	@Override
+	public boolean isFinished(){
+		return _pneumatic.isElevatorFinished();
 	}
 
 	@Override
