@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
+import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.*;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -31,7 +32,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 	}
 
 	private DrivetrainSubsystem() {
-		super(new PIDController(1.0, 0.0, 0.0));
+		super(new PIDController(2.5, 0.0, 0.0));
 
 		WPI_TalonFX leftMaster = new WPI_TalonFX(RobotMap.Talon.LEFT_MASTER.getChannel());
 		WPI_TalonFX rightMaster = new WPI_TalonFX(RobotMap.Talon.RIGHT_MASTER.getChannel());
@@ -54,16 +55,16 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
 		_leftMaster.configAllSettings(config);
 		_leftMaster.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
-		_leftMaster.setInverted(false);
+		//_leftMaster.setInverted(false);
 		_leftMaster.setSelectedSensorPosition(0);
 
 		_rightMaster.configAllSettings(config);
 		_rightMaster.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
-		_rightMaster.setInverted(false);
+		//_rightMaster.setInverted(TalonFXInvertType.CounterClockwise);
 		_rightMaster.setSelectedSensorPosition(0);
 
 
-		_pidZoneBuffer = 12.0; // Inches
+		_pidZoneBuffer = Conversions.inchToEncoderPosition(36.0); // Inches
 
 		getController().setTolerance(10.0); // Encoder ticks
 	}
@@ -76,6 +77,8 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		}
 
 		_wheels.arcadeDrive(moveValue * MotorSpeeds.DRIVE_ACCELERATION_SPEED, rotateValue * MotorSpeeds.DRIVE_TURN_SPEED);
+		System.out.println("moveValue : " + moveValue +  " rotateValue : " + rotateValue);
+		System.out.println(" left speed : " + getCurrentLeftVelocity() / getCurrentRightVelocity() + " right speed : " + getCurrentRightVelocity() / getCurrentLeftVelocity());
 	}
 
 	public void tankDrive(double leftMoveValue, double rightMoveValue) {
@@ -111,11 +114,11 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 	}
 
 	public double getCurrentRightPosition() {
-		return _rightMaster.getSelectedSensorPosition(0);
+		return -_rightMaster.getSelectedSensorPosition(0);
 	}
 
 	public double getCurrentRightVelocity() {
-		return _rightMaster.getSelectedSensorVelocity(0);
+		return -_rightMaster.getSelectedSensorVelocity(0);
 	}
 
 	public boolean isOnTarget() {
@@ -160,11 +163,11 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
 	@Override
 	protected void useOutput(double output, double setpoint) {
-		System.out.println("Output: " + output + " || setpoint: " + setpoint);
+		//System.out.println("Output: " + output + " || setpoint: " + setpoint);
 
-		double percentOutput = Conversions.encoderPositionToInches(Math.abs(output)) / _pidZoneBuffer;
-		System.out.println("Percent output: " + percentOutput);
-		System.out.println("Left vel.: " + getCurrentLeftVelocity() + " || Right vel.: " + getCurrentRightVelocity());
+		double percentOutput = getMeasurement() / _pidZoneBuffer;
+		//System.out.println("Percent output: " + percentOutput);
+		//System.out.println("Left vel.: " + getCurrentLeftVelocity() + " || Right vel.: " + getCurrentRightVelocity());
 
 		double leftMoveValue = (percentOutput > 1)? 1.0 : percentOutput;
 		double rightMoveValue = (percentOutput > 1)? 1.0 : percentOutput;
@@ -177,13 +180,9 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		else if(leftSpeed > rightSpeed)
 			leftMoveValue *= rightSpeed / leftSpeed;
 
-		if (output < 0) {
-			leftMoveValue *= -1;
-			rightMoveValue *= -1;
-		}
-		System.out.println("Left: " + leftMoveValue + " || Right: " + rightMoveValue);
+		//System.out.println("Left: " + leftMoveValue + " || Right: " + rightMoveValue);
 
-
+	/*
 		switch (_type) {
 			case STRAIGHT:
 				tankDrive(leftMoveValue, rightMoveValue);
@@ -192,13 +191,14 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 				tankDrive(leftMoveValue, -rightMoveValue);
 				break;
 		}
+		*/
+		tankDrive(leftMoveValue, rightMoveValue);
 	}
 
 	@Override
 	protected double getMeasurement() {
-		//System.out.println("Getting measurement");
-
 		double setpoint = getController().getSetpoint();
+		System.out.println("Getting measurement setpoint:" +  setpoint + " left : " + getCurrentLeftPosition() + " right : " + getCurrentRightPosition());
 
 		if(Math.abs(setpoint - getCurrentLeftPosition()) < Math.abs(setpoint - getCurrentRightPosition())) {
 			return getCurrentRightPosition();

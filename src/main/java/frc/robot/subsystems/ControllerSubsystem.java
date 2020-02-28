@@ -30,10 +30,10 @@ public class ControllerSubsystem implements Subsystem {
         yButton.whenPressed(new DriveToCommand(12));
 
         JoystickButton leftBumper = new JoystickButton(_joystick, ControllerMap.LEFT_BUMPER);
-        leftBumper.whenPressed(new RunControlTerminalCommand(-1.0));
+        leftBumper.whileHeld(new RunControlTerminalCommand(-1.0));
 
         JoystickButton rightBumper = new JoystickButton(_joystick, ControllerMap.RIGHT_BUMPER);
-        rightBumper.whenPressed(new RunControlTerminalCommand(1.0));
+        rightBumper.whileHeld(new RunControlTerminalCommand(1.0));
     }
 
     public static ControllerSubsystem getInstance() {
