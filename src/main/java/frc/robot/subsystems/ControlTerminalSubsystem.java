@@ -122,7 +122,6 @@ public class ControlTerminalSubsystem implements Subsystem {
         _controlTerminal.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
     }
 
-
     public void runControlTerminal(double speed) {
         _controlTerminal.set(ControlMode.PercentOutput, speed);
     }

@@ -11,9 +11,6 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 import java.util.HashSet;
 import java.util.Set;
 
-import java.util.HashMap;
-import java.util.Map;
-
 
 public class CommandWithController implements Command {
     private DrivetrainSubsystem _drive;
@@ -32,15 +29,12 @@ public class CommandWithController implements Command {
 
     @Override
     public void execute() {
-        double driveSpeed = _controller.getJoystick().getRawAxis(ControllerMap.AXIS_TRIGGER_RT) -
-                _controller.getJoystick().getRawAxis(ControllerMap.AXIS_TRIGGER_LT);
+        double driveSpeed = _controller.getJoystick().getRawAxis(ControllerMap.RIGHT_TRIGGER) -
+                _controller.getJoystick().getRawAxis(ControllerMap.LEFT_TRIGGER);
         double driveAngle = _controller.getJoystick().getRawAxis(ControllerMap.LEFT_AXIS_X);
-
-        System.out.println("Left: " + _drive.getCurrentLeftPosition() + " || Right: " + _drive.getCurrentRightPosition());
 
         _drive.arcadeDrive(driveSpeed, driveAngle);
     }
-
 
     @Override
     public boolean isFinished() {

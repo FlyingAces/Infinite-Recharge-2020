@@ -11,11 +11,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class RunControlTerminalUntilColor implements Command {
+public class RunControlTerminalUntilColorCommand implements Command {
 	private ControlTerminalSubsystem _controlTerminal;
 	private String _color;
 
-	public RunControlTerminalUntilColor(String color) {
+	public RunControlTerminalUntilColorCommand(String color) {
 		_controlTerminal = ControlTerminalSubsystem.getInstance();
 
 		_color = color;

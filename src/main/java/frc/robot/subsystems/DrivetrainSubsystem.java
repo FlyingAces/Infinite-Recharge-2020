@@ -20,9 +20,7 @@ import frc.robot.util.Conversions;
 public class DrivetrainSubsystem extends PIDSubsystem {
 	private static DrivetrainSubsystem _instance;
 	private TalonFX _leftMaster;
-	private TalonFX _leftSlave;
 	private TalonFX _rightMaster;
-	private TalonFX _rightSlave;
 
 	private DifferentialDrive _wheels;
 	private CommandType _type;
@@ -61,7 +59,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
 		_rightMaster.configAllSettings(config);
 		_rightMaster.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
-		_rightMaster.setInverted(true);
+		_rightMaster.setInverted(false);
 		_rightMaster.setSelectedSensorPosition(0);
 
 

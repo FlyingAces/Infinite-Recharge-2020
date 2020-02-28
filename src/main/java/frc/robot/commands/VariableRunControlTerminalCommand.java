@@ -12,11 +12,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class TurnControlTerminalCommand implements Command {
+public class VariableRunControlTerminalCommand implements Command {
 	private ControlTerminalSubsystem _controlTerminal;
 	private int _rotations;
 
-	public TurnControlTerminalCommand(int rotations) {
+	public VariableRunControlTerminalCommand(int rotations) {
 		_controlTerminal = ControlTerminalSubsystem.getInstance();
 
 		_rotations = rotations;
