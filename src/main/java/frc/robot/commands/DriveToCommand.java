@@ -24,7 +24,7 @@ public class DriveToCommand implements Command {
 	public void initialize(){
 		_drivetrain.setSetpoint(_distance, DrivetrainSubsystem.CommandType.STRAIGHT);
 		_drivetrain.enable();
-		execute();
+		//execute();
 	}
 
 	@Override
@@ -42,7 +42,8 @@ public class DriveToCommand implements Command {
 	public void end(boolean interrupted) {
 		_drivetrain.tankDrive(0.0, 0.0);
 		_drivetrain.disable();
-		_drivetrain.zeroDrivetrain();
+		System.out.println("Finished command.");
+		_drivetrain.resetEncoders();
 	}
 
 	@Override

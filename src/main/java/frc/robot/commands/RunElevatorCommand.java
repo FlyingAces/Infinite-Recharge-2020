@@ -20,11 +20,11 @@ public class RunElevatorCommand implements Command {
 	@Override
 	public void initialize() {
 		switch (_pneumatic.getSolenoidState()){
-			case FORWARD:
-				_pneumatic.runElevator(ControlTerminalSubsystem.SolenoidState.REVERSE);
+			case UP:
+				_pneumatic.runElevator(ControlTerminalSubsystem.SolenoidState.DOWN);
 				break;
 			default:
-				_pneumatic.runElevator(ControlTerminalSubsystem.SolenoidState.FORWARD);
+				_pneumatic.runElevator(ControlTerminalSubsystem.SolenoidState.UP);
 				break;
 		}
 	}
@@ -51,5 +51,6 @@ public class RunElevatorCommand implements Command {
 	@Override
 	public void end(boolean interrupted) {
 		_pneumatic.solenoidOff();
+		//System.out.println("Command ended.");
 	}
 }

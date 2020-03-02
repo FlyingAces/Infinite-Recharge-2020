@@ -5,8 +5,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import frc.robot.config.MotorSpeeds;
-import frc.robot.config.RobotMap;
 import frc.robot.subsystems.ControlTerminalSubsystem;
+import frc.robot.util.Conversions;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,12 +14,12 @@ import java.util.Set;
 
 public class VariableRunControlTerminalCommand implements Command {
 	private ControlTerminalSubsystem _controlTerminal;
-	private int _rotations;
+	private double _rotations;
 
 	public VariableRunControlTerminalCommand(int rotations) {
 		_controlTerminal = ControlTerminalSubsystem.getInstance();
 
-		_rotations = rotations;
+		_rotations = Conversions.colorWheelToEncoderTicks(rotations);
 	}
 
 	@Override
@@ -34,8 +34,7 @@ public class VariableRunControlTerminalCommand implements Command {
 
 	@Override
 	public boolean isFinished() {
-		return _controlTerminal.getEncoderPosition() >=
-				((RobotMap.FieldElementMeasurement.FIELD_CONTROL_TERMINAL.getInches() / RobotMap.RobotMeasurement.CONTROL_TERMINAL_WHEEL_DIAMETER.getInches()) * 4096) * _rotations;
+		return _controlTerminal.getEncoderPosition() >= _rotations;
 	}
 
 	@Override

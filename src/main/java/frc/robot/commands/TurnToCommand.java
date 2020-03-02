@@ -24,12 +24,12 @@ public class TurnToCommand implements Command {
 	public void initialize() {
 		_drivetrain.setSetpoint(_degree, DrivetrainSubsystem.CommandType.TURN);
 		_drivetrain.enable();
-		execute();
+		//execute();
 	}
 
 	@Override
 	public void execute() {
-		System.out.println("Left: " + _drivetrain.getCurrentLeftPosition() + " || Right: " + _drivetrain.getCurrentRightPosition());
+		//System.out.println("Left: " + _drivetrain.getCurrentLeftPosition() + " || Right: " + _drivetrain.getCurrentRightPosition());
 	}
 
 	@Override
@@ -49,6 +49,6 @@ public class TurnToCommand implements Command {
 	public void end(boolean interrupted) {
 		_drivetrain.tankDrive(0.0, 0.0);
 		_drivetrain.disable();
-		_drivetrain.zeroDrivetrain();
+		_drivetrain.resetEncoders();
 	}
 }

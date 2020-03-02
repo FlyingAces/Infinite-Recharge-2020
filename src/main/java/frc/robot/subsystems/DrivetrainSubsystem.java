@@ -2,12 +2,15 @@ package frc.robot.subsystems;
 
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.*;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
@@ -22,30 +25,45 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 	private static DrivetrainSubsystem _instance;
 	private TalonFX _leftMaster;
 	private TalonFX _rightMaster;
-
 	private DifferentialDrive _wheels;
 	private CommandType _type;
-	private double _pidZoneBuffer;
+	private NetworkTable _table;
+
+	private double _prevOutput;
+	private double _leftPrevTankOutput;
+	private double _rightPrevTankOutput;
 
 	public enum CommandType {
 		STRAIGHT, TURN;
 	}
 
 	private DrivetrainSubsystem() {
-		super(new PIDController(2.5, 0.0, 0.0));
+		super(new PIDController(0.00025, 0.00001, 0.0));
 
 		WPI_TalonFX leftMaster = new WPI_TalonFX(RobotMap.Talon.LEFT_MASTER.getChannel());
 		WPI_TalonFX rightMaster = new WPI_TalonFX(RobotMap.Talon.RIGHT_MASTER.getChannel());
 		WPI_TalonFX leftSlave = new WPI_TalonFX(RobotMap.Talon.LEFT_SLAVE.getChannel());
 		WPI_TalonFX rightSlave = new WPI_TalonFX(RobotMap.Talon.RIGHT_SLAVE.getChannel());
 
-		SpeedControllerGroup leftGroup = new SpeedControllerGroup(leftMaster, leftSlave);
-		SpeedControllerGroup rightGroup = new SpeedControllerGroup(rightMaster, rightSlave);
+		leftMaster.configFactoryDefault();
+		leftSlave.configFactoryDefault();
+		rightMaster.configFactoryDefault();
+		leftSlave.configFactoryDefault();
+
+		rightSlave.follow(rightMaster);
+		leftSlave.follow(leftMaster);
+
+		rightMaster.setInverted(TalonFXInvertType.Clockwise);
+		leftMaster.setInverted(TalonFXInvertType.CounterClockwise);
+
+		rightSlave.setInverted(InvertType.FollowMaster);
+		leftSlave.setInverted(InvertType.FollowMaster);
 
 		_type = CommandType.STRAIGHT;
 
-		_wheels = new DifferentialDrive(leftGroup, rightGroup);
+		_wheels = new DifferentialDrive(leftMaster, rightMaster);
 		_wheels.setSafetyEnabled(false);
+		_wheels.setRightSideInverted(false);
 
 		_leftMaster = leftMaster;
 		_rightMaster = rightMaster;
@@ -55,18 +73,52 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
 		_leftMaster.configAllSettings(config);
 		_leftMaster.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
-		//_leftMaster.setInverted(false);
 		_leftMaster.setSelectedSensorPosition(0);
 
 		_rightMaster.configAllSettings(config);
 		_rightMaster.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, RobotMap.K_TIMEOUT_MS);
-		//_rightMaster.setInverted(TalonFXInvertType.CounterClockwise);
 		_rightMaster.setSelectedSensorPosition(0);
 
+		_table = NetworkTableInstance.getDefault().getTable("limelight");
 
-		_pidZoneBuffer = Conversions.inchToEncoderPosition(36.0); // Inches
+		getController().setTolerance(Conversions.inchToEncoderPosition(.1)); // Encoder ticks
+	}
 
-		getController().setTolerance(10.0); // Encoder ticks
+	public void tableEntries() {
+		double x = _table.getEntry("tx").getDouble(0.0);
+		double y = _table.getEntry("ty").getDouble(0.0);
+		double area = _table.getEntry("ta").getDouble(0.0);
+
+		System.out.println("X: " + x + " Y: " + y + " area: " + area);
+	}
+
+	public void displayTemperature() {
+		System.out.println("L-temp: " + _leftMaster.getTemperature() + " R-temp: " + _rightMaster.getTemperature());
+	}
+
+	private double positiveAccelerationControl(double output, double prevOutput) {
+		double newOutput = output;
+
+		if(output > 0) {
+			if (prevOutput > 0 && (output - prevOutput) > MotorSpeeds.GEAR_SHIFT_INCREMENT)
+				newOutput = prevOutput * (MotorSpeeds.GEAR_SHIFT_INCREMENT + 1);
+			else if(prevOutput == 0)
+				newOutput = MotorSpeeds.GEAR_SHIFT_INCREMENT;
+
+		} else if (output < 0) {
+			if (prevOutput < 0 && (output - prevOutput) < -MotorSpeeds.GEAR_SHIFT_INCREMENT)
+				newOutput = prevOutput * (MotorSpeeds.GEAR_SHIFT_INCREMENT + 1);
+			else if(prevOutput == 0)
+				newOutput = -MotorSpeeds.GEAR_SHIFT_INCREMENT;
+		}
+
+		if (newOutput > 0 && newOutput < 0.25) {
+			newOutput = 0.25;
+		} else if (newOutput  < 0 && newOutput > -0.25) {
+			newOutput = -0.25;
+		}
+
+		return newOutput;
 	}
 
 	public void arcadeDrive(double moveValue, double rotateValue) {
@@ -76,9 +128,20 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 			moveValue *= MotorSpeeds.AUTONOMOUS_SPEED_MULTIPLIER;
 		}
 
-		_wheels.arcadeDrive(moveValue * MotorSpeeds.DRIVE_ACCELERATION_SPEED, rotateValue * MotorSpeeds.DRIVE_TURN_SPEED);
-		System.out.println("moveValue : " + moveValue +  " rotateValue : " + rotateValue);
-		System.out.println(" left speed : " + getCurrentLeftVelocity() / getCurrentRightVelocity() + " right speed : " + getCurrentRightVelocity() / getCurrentLeftVelocity());
+		switch (ControlTerminalSubsystem.getInstance().getSolenoidState()) {
+			case DOWN:
+				moveValue *= MotorSpeeds.DRIVETRAIN_CRAWL_MULTIPLIER;
+				rotateValue *= MotorSpeeds.DRIVETRAIN_CRAWL_MULTIPLIER;
+			default:
+				break;
+		}
+
+		moveValue = positiveAccelerationControl(moveValue * MotorSpeeds.DRIVE_ACCELERATION_SPEED, _prevOutput);
+		_prevOutput = moveValue;
+
+		double offsetLeftTurn = Math.abs(MotorSpeeds.LEFT_TURN_OFFSET_MULTIPLIER * moveValue);
+
+		_wheels.arcadeDrive(moveValue, (rotateValue * MotorSpeeds.DRIVE_TURN_SPEED) - offsetLeftTurn);
 	}
 
 	public void tankDrive(double leftMoveValue, double rightMoveValue) {
@@ -90,7 +153,13 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 			leftMoveValue *= MotorSpeeds.AUTONOMOUS_SPEED_MULTIPLIER;
 		}
 
-		_wheels.tankDrive(leftMoveValue * MotorSpeeds.DRIVE_ACCELERATION_SPEED, rightMoveValue * MotorSpeeds.DRIVE_ACCELERATION_SPEED);
+		rightMoveValue = positiveAccelerationControl(rightMoveValue, _rightPrevTankOutput);
+		leftMoveValue = positiveAccelerationControl(leftMoveValue, _leftPrevTankOutput);
+
+		_wheels.tankDrive(leftMoveValue , rightMoveValue);
+
+		_leftPrevTankOutput = leftMoveValue;
+		_rightPrevTankOutput = rightMoveValue;
 	}
 
 	public static DrivetrainSubsystem getInstance(){
@@ -100,7 +169,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		return _instance;
 	}
 
-	public void zeroDrivetrain() {
+	public void resetEncoders() {
 		_leftMaster.setSelectedSensorPosition(0);
 		_rightMaster.setSelectedSensorPosition(0);
 	}
@@ -114,15 +183,18 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 	}
 
 	public double getCurrentRightPosition() {
-		return -_rightMaster.getSelectedSensorPosition(0);
+		return _rightMaster.getSelectedSensorPosition(0);
 	}
 
 	public double getCurrentRightVelocity() {
-		return -_rightMaster.getSelectedSensorVelocity(0);
+		return _rightMaster.getSelectedSensorVelocity(0);
 	}
 
 	public boolean isOnTarget() {
-		return getController().atSetpoint();
+		return  (getCurrentLeftPosition() != 0 && getCurrentRightPosition() != 0) &&
+				(getCurrentLeftVelocity() == 0 && getCurrentRightVelocity() == 0);
+		//System.out.println("Set point: " + getController().getSetpoint() + " Tolerance: " + getController().to);
+		//return getController().atSetpoint();
 	}
 
 	public void setCommandType(CommandType type) {
@@ -131,46 +203,23 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
 	public void setSetpoint(double dis, CommandType type) {
 		setCommandType(type);
-		setSetpoint(dis);
-	}
 
-	/***
-	 * Set the zone in which the PID output takes effect.
-	 * The PID zone is 0.0 by default.
-	 * @param inches The effective PID zone in inches.
-	 */
-	public void setPIDZoneBuffer(double inches) {
-		_pidZoneBuffer = inches;
-	}
-
-	@Override
-	public void setSetpoint(double dis){
-		if(_rightMaster != null && _leftMaster != null) {
-			zeroDrivetrain();
-
-			switch (_type) {
-				case STRAIGHT:
-					super.setSetpoint(Conversions.inchToEncoderPosition(dis));
-					break;
-				case TURN:
-					super.setSetpoint(Conversions.angleToEncoderPosition(dis));
-					break;
-			}
-			System.out.println("total : " + Conversions.inchToEncoderPosition(dis));
-		} else
-			super.setSetpoint(dis);
+		resetEncoders();
+		switch (_type) {
+			case STRAIGHT:
+				setSetpoint(Conversions.inchToEncoderPosition(dis));
+				break;
+			case TURN:
+				setSetpoint(Conversions.angleToEncoderPosition(dis));
+				break;
+		}
 	}
 
 	@Override
 	protected void useOutput(double output, double setpoint) {
-		//System.out.println("Output: " + output + " || setpoint: " + setpoint);
 
-		double percentOutput = getMeasurement() / _pidZoneBuffer;
-		//System.out.println("Percent output: " + percentOutput);
-		//System.out.println("Left vel.: " + getCurrentLeftVelocity() + " || Right vel.: " + getCurrentRightVelocity());
-
-		double leftMoveValue = (percentOutput > 1)? 1.0 : percentOutput;
-		double rightMoveValue = (percentOutput > 1)? 1.0 : percentOutput;
+		double leftMoveValue = (output > 1)? 1.0 : (output < -1)? -1.0 : output;
+		double rightMoveValue = (output > 1)? 1.0 : (output < -1)? -1.0 : output;
 
 		double rightSpeed = Math.abs(getCurrentRightVelocity());
 		double leftSpeed = Math.abs(getCurrentLeftVelocity());
@@ -180,9 +229,6 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		else if(leftSpeed > rightSpeed)
 			leftMoveValue *= rightSpeed / leftSpeed;
 
-		//System.out.println("Left: " + leftMoveValue + " || Right: " + rightMoveValue);
-
-	/*
 		switch (_type) {
 			case STRAIGHT:
 				tankDrive(leftMoveValue, rightMoveValue);
@@ -191,19 +237,21 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 				tankDrive(leftMoveValue, -rightMoveValue);
 				break;
 		}
-		*/
-		tankDrive(leftMoveValue, rightMoveValue);
+		//tankDrive(leftMoveValue, rightMoveValue);
 	}
 
 	@Override
 	protected double getMeasurement() {
 		double setpoint = getController().getSetpoint();
-		System.out.println("Getting measurement setpoint:" +  setpoint + " left : " + getCurrentLeftPosition() + " right : " + getCurrentRightPosition());
+		//System.out.println("Getting measurement setpoint:" +  setpoint + " left : " + getCurrentLeftPosition() + " right : " + getCurrentRightPosition());
 
+		return getCurrentLeftPosition();
+		/*
 		if(Math.abs(setpoint - getCurrentLeftPosition()) < Math.abs(setpoint - getCurrentRightPosition())) {
 			return getCurrentRightPosition();
 		} else {
 			return getCurrentLeftPosition();
 		}
+		 */
 	}
 }

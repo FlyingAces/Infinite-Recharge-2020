@@ -18,16 +18,16 @@ public class ControllerSubsystem implements Subsystem {
         _joystick = new Joystick(ControllerMap.JOYSTICK_PORT);
 
         JoystickButton xButton = new JoystickButton(_joystick, ControllerMap.X_BUTTON);
-        xButton.whenPressed(new RunControlTerminalUntilColorCommand("Green"));
+        xButton.whenPressed(new RunControlTerminalUntilColorCommand());
 
         JoystickButton aButton = new JoystickButton(_joystick, ControllerMap.A_BUTTON);
         aButton.whenPressed(new RunElevatorCommand());
 
         JoystickButton bButton = new JoystickButton(_joystick, ControllerMap.B_BUTTON);
-        bButton.whenPressed(new VariableRunControlTerminalCommand(3));
+        bButton.toggleWhenPressed(new VariableRunControlTerminalCommand(4));
 
         JoystickButton yButton = new JoystickButton(_joystick, ControllerMap.Y_BUTTON);
-        yButton.whenPressed(new DriveToCommand(12));
+        //yButton.whenPressed(new RunChaCha());
 
         JoystickButton leftBumper = new JoystickButton(_joystick, ControllerMap.LEFT_BUMPER);
         leftBumper.whileHeld(new RunControlTerminalCommand(-1.0));

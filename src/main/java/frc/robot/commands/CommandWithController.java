@@ -32,7 +32,12 @@ public class CommandWithController implements Command {
         double driveSpeed = _controller.getJoystick().getRawAxis(ControllerMap.RIGHT_TRIGGER) -
                 _controller.getJoystick().getRawAxis(ControllerMap.LEFT_TRIGGER);
         double driveAngle = _controller.getJoystick().getRawAxis(ControllerMap.LEFT_AXIS_X);
+
         _drive.arcadeDrive(driveSpeed, driveAngle);
+        /*
+        _drive.tableEntries();
+        _drive.displayTemperature();
+         */
     }
 
     @Override

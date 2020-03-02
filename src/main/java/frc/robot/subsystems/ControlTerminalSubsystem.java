@@ -23,15 +23,29 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 import frc.robot.config.RobotMap;
 
-import java.awt.*;
-
 
 public class ControlTerminalSubsystem implements Subsystem {
     private static ControlTerminalSubsystem _instance;
 
+    public static enum ColorTypes {
+        RED(ColorMatch.makeColor(0.561, 0.232, 0.114)),
+        BLUE(ColorMatch.makeColor(0.143, 0.427, 0.429)),
+        YELLOW(ColorMatch.makeColor(0.361, 0.524, 0.113)),
+        GREEN(ColorMatch.makeColor(0.197, 0.561, 0.240));
+
+        private ColorTypes(Color color) {
+            _color = color;
+        }
+
+        private Color _color;
+
+        private Color getColor() {
+            return _color;
+        }
+    }
+
     private Compressor _compressor;
     private DoubleSolenoid _elevatorSolenoid;
-    private DoubleSolenoid _aimSolenoid;
     private SolenoidState _state;
 
     private TalonSRX _controlTerminal;
@@ -40,11 +54,10 @@ public class ControlTerminalSubsystem implements Subsystem {
     private final ColorSensorV3 _colorSensor = new ColorSensorV3(_i2cPort);
     private final ColorMatch _colorMatcher = new ColorMatch();
 
-
     public enum SolenoidState {
         OFF(DoubleSolenoid.Value.kOff),
-        FORWARD(DoubleSolenoid.Value.kForward),
-        REVERSE(DoubleSolenoid.Value.kReverse);
+        UP(DoubleSolenoid.Value.kForward),
+        DOWN(DoubleSolenoid.Value.kReverse);
 
         SolenoidState(DoubleSolenoid.Value state) {
             _state = state;
@@ -64,9 +77,10 @@ public class ControlTerminalSubsystem implements Subsystem {
         _compressor.setClosedLoopControl(true);
 
         _elevatorSolenoid = new DoubleSolenoid(RobotMap.Pneumatics.ELEVATOR_SOLENOID_FWD_CHANNEL.getChannel(), RobotMap.Pneumatics.ELEVATOR_SOLENOID_REV_CHANNEL.getChannel());
-        _aimSolenoid = new DoubleSolenoid(RobotMap.Pneumatics.INTAKE_SOLENOID_FWD_CHANNEL.getChannel(), RobotMap.Pneumatics.INTAKE_SOLENOID_REV_CHANNEL.getChannel());
 
         _state = SolenoidState.OFF;
+        solenoidOff();
+
         _controlTerminal = controlTerminal;
 
         _controlTerminal.configFactoryDefault();
@@ -76,16 +90,14 @@ public class ControlTerminalSubsystem implements Subsystem {
         _controlTerminal.configPeakOutputForward(1.0, RobotMap.K_TIMEOUT_MS);
         _controlTerminal.configPeakOutputReverse(-1.0, RobotMap.K_TIMEOUT_MS);
         _controlTerminal.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, RobotMap.K_TIMEOUT_MS);
-        _controlTerminal.setSensorPhase(true);
         _controlTerminal.setSelectedSensorPosition(-(_controlTerminal.getSensorCollection().getPulseWidthPosition() & 0xfff), 0, RobotMap.K_TIMEOUT_MS);
         _controlTerminal.getSensorCollection().setQuadraturePosition(0, RobotMap.K_TIMEOUT_MS);
 
-        _colorMatcher.addColorMatch(RobotMap.BLUE_TARGET);
-        _colorMatcher.addColorMatch(RobotMap.GREEN_TARGET);
-        _colorMatcher.addColorMatch(RobotMap.RED_TARGET);
-        _colorMatcher.addColorMatch(RobotMap.YELLOW_TARGET);
+        _colorMatcher.addColorMatch(ColorTypes.BLUE.getColor());
+        _colorMatcher.addColorMatch(ColorTypes.YELLOW.getColor());
+        _colorMatcher.addColorMatch(ColorTypes.GREEN.getColor());
+        _colorMatcher.addColorMatch(ColorTypes.RED.getColor());
     }
-
 
     public static ControlTerminalSubsystem getInstance(){
         if(_instance == null)
@@ -98,20 +110,19 @@ public class ControlTerminalSubsystem implements Subsystem {
         return _colorSensor.getColor();
     }
 
-    public String getColorString() {
+    public ColorTypes getColorType() {
         ColorMatchResult match = _colorMatcher.matchClosestColor(getDetectedColor());
 
-        if (match.color == RobotMap.BLUE_TARGET) {
-            return "Blue";
-        } else if (match.color == RobotMap.RED_TARGET) {
-            return "Red";
-        } else if (match.color == RobotMap.GREEN_TARGET) {
-            return "Green";
-        } else if (match.color == RobotMap.YELLOW_TARGET) {
-            return "Yellow";
-        } else {
-            return "Unknown";
+        if (match.color == ColorTypes.BLUE.getColor()) {
+            return ColorTypes.BLUE;
+        } else if (match.color == ColorTypes.RED.getColor()) {
+            return ColorTypes.RED;
+        } else if (match.color == ColorTypes.GREEN.getColor()) {
+            return ColorTypes.GREEN;
+        } else if (match.color == ColorTypes.YELLOW.getColor()) {
+            return ColorTypes.YELLOW;
         }
+        return null;
     }
 
     public int getEncoderPosition() {
@@ -140,7 +151,6 @@ public class ControlTerminalSubsystem implements Subsystem {
 
     public void solenoidOff(){
         _elevatorSolenoid.set(SolenoidState.OFF.getState());
-        _aimSolenoid.set(SolenoidState.OFF.getState());
     }
 
     public SolenoidState getSolenoidState(){
@@ -156,28 +166,10 @@ public class ControlTerminalSubsystem implements Subsystem {
         switch (_state){
             case OFF:
                 return true;
-            case FORWARD:
+            case UP:
                 return _elevatorSolenoid.get() == DoubleSolenoid.Value.kForward;
-            case REVERSE:
+            case DOWN:
                 return _elevatorSolenoid.get() == DoubleSolenoid.Value.kReverse;
-            default:
-                return true;
-        }
-    }
-
-    public void runAimer(SolenoidState state){
-        _state = state;
-        _aimSolenoid.set(_state.getState());
-    }
-
-    public boolean isAimerFinished(){
-        switch (_state){
-            case OFF:
-                return true;
-            case FORWARD:
-                return _aimSolenoid.get() == SolenoidState.FORWARD.getState();
-            case REVERSE:
-                return _aimSolenoid.get() == SolenoidState.REVERSE.getState();
             default:
                 return true;
         }
