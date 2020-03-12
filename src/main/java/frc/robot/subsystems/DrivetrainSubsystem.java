@@ -84,19 +84,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		getController().setTolerance(Conversions.inchToEncoderPosition(.1)); // Encoder ticks
 	}
 
-	public void tableEntries() {
-		double x = _table.getEntry("tx").getDouble(0.0);
-		double y = _table.getEntry("ty").getDouble(0.0);
-		double area = _table.getEntry("ta").getDouble(0.0);
-
-		System.out.println("X: " + x + " Y: " + y + " area: " + area);
-	}
-
-	public void displayTemperature() {
-		System.out.println("L-temp: " + _leftMaster.getTemperature() + " R-temp: " + _rightMaster.getTemperature());
-	}
-
-	private double positiveAccelerationControl(double output, double prevOutput) {
+	private double linearAccelerationControl(double output, double prevOutput) {
 		double newOutput = output;
 
 		if(output > 0) {
@@ -136,7 +124,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 				break;
 		}
 
-		moveValue = positiveAccelerationControl(moveValue * MotorSpeeds.DRIVE_ACCELERATION_SPEED, _prevOutput);
+		moveValue = linearAccelerationControl(moveValue * MotorSpeeds.DRIVE_ACCELERATION_SPEED, _prevOutput);
 		_prevOutput = moveValue;
 
 		double offsetLeftTurn = Math.abs(MotorSpeeds.LEFT_TURN_OFFSET_MULTIPLIER * moveValue);
@@ -153,8 +141,8 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 			leftMoveValue *= MotorSpeeds.AUTONOMOUS_SPEED_MULTIPLIER;
 		}
 
-		rightMoveValue = positiveAccelerationControl(rightMoveValue, _rightPrevTankOutput);
-		leftMoveValue = positiveAccelerationControl(leftMoveValue, _leftPrevTankOutput);
+		rightMoveValue = linearAccelerationControl(rightMoveValue, _rightPrevTankOutput);
+		leftMoveValue = linearAccelerationControl(leftMoveValue, _leftPrevTankOutput);
 
 		_wheels.tankDrive(leftMoveValue , rightMoveValue);
 
@@ -239,7 +227,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 		}
 		//tankDrive(leftMoveValue, rightMoveValue);
 	}
-
+	
 	@Override
 	protected double getMeasurement() {
 		double setpoint = getController().getSetpoint();
